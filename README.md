@@ -16,3 +16,4 @@ We are following Agile methodology. Weekly sprints will track progress and respo
 - Set up basic desktop environment with GUI skeleton
 - Upload requirements and planning docs
 - Establish roles and repo structure
+- test
