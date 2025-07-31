@@ -16,3 +16,8 @@ We are following Agile methodology. Weekly sprints will track progress and respo
 - Set up basic desktop environment with GUI skeleton
 - Upload requirements and planning docs
 - Establish roles and repo structure
+
+## Sprint 2 Goals (Due August 8)
+- Set up the sign up & login page and store the information
+- Option to create inner circle and join one
+- Keep track of the amount of people that joined a circle and who the creator is.
