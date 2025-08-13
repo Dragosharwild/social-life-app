@@ -2,6 +2,10 @@ import tkinter as tk
 from tkinter import ttk, messagebox
 from create_account import CreateAccountScreen
 from interests import InterestsScreen
+from feed import FeedScreen
+from feed import FeedScreen
+from create_bubble import CreateBubbleScreen
+from profile import ProfileScreen
 
 root = tk.Tk()
 root.title("CircleSync")
@@ -98,6 +102,21 @@ screens["create"] = create
 interests = InterestsScreen(container, show_callback = show)
 interests.grid(row = 0, column = 0, sticky = "nsew")
 screens["interests"] = interests
+
+# Feed
+feed = FeedScreen(container, show_callback = show)
+feed.grid(row = 0, column = 0, sticky = "nsew")
+screens["feed"] = feed
+
+# Creating Bubble
+create_bubble = CreateBubbleScreen(container, show_callback = show)
+create_bubble.grid(row = 0, column = 0, sticky = "nsew")
+screens["create_bubble"] = create_bubble
+
+# Profile
+profile = ProfileScreen(container, show_callback = show)
+profile.grid(row = 0, column = 0, sticky = "nsew")
+screens["profile"] = profile
 
 # Start on login
 show("login")

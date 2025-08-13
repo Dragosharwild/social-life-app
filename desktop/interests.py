@@ -82,5 +82,6 @@ class InterestsScreen(ttk.Frame):
             self.followed.add(interest_id)
         self.refresh()
 
+    # Was just a message box before, now leads to the feed
     def _continue(self):
-        messagebox.showinfo("Next step", "This would go to the feed page.")
+        self.show("feed")
