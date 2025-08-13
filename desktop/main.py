@@ -1,6 +1,7 @@
 import tkinter as tk
 from tkinter import ttk, messagebox
 from create_account import CreateAccountScreen
+from interests import InterestsScreen
 
 root = tk.Tk()
 root.title("CircleSync")
@@ -34,7 +35,7 @@ def centered_card(parent):
         parent.grid_rowconfigure(r, weight = 1)
     for c in range(3):
         parent.grid_columnconfigure(c, weight = 1)
-    card = ttk.Frame(parent, padding=20, relief = "ridge")
+    card = ttk.Frame(parent, padding = 20, relief = "ridge")
     card.grid(row = 1, column = 1)
     return card
 
@@ -51,16 +52,16 @@ ttk.Label(card, text = "Create a CircleSync account", font = ("Segoe UI", 14, "b
 
 ttk.Button(card, text = "Create an account", command = lambda: show("create")).grid(row = 1, column = 0, columnspan = 2, sticky = "ew", pady = (0, 10))
 
-ttk.Label(card, tex = "or").grid(row = 2, column = 0, columnspan = 2, pady = (0, 8))
+ttk.Label(card, text = "or").grid(row = 2, column = 0, columnspan = 2, pady = (0, 8))
 
 email_var   = tk.StringVar()
 passwd_var  = tk.StringVar()
 show_passwd = tk.BooleanVar(value = False)
 
-ttk.Label(card, text="Username / Email").grid(row = 3, column = 0, sticky = "w", pady = 4)
+ttk.Label(card, text = "Username / Email").grid(row = 3, column = 0, sticky = "w", pady = 4)
 ttk.Entry(card, textvariable = email_var, width = 32).grid(row = 3, column = 1, pady = 4)
 
-ttk.Label(card, text="Password").grid(row = 4, column = 0, sticky = "w", pady = 4)
+ttk.Label(card, text = "Password").grid(row = 4, column = 0, sticky = "w", pady = 4)
 passwd_entry = ttk.Entry(card, textvariable = passwd_var, show = "•", width = 32)
 passwd_entry.grid(row = 4, column = 1, pady = 4)
 
@@ -74,9 +75,16 @@ def on_login():
     if not u or not p:
         messagebox.showwarning("Missing info", "Please enter both username/email and password.")
         return
-    messagebox.showinfo("Login", f"(mock) Logging in as {u}")
+    # Now goes straight to Interests
+    show("interests")
 
 ttk.Button(card, text = "Log In", command = on_login).grid(row = 6, column = 0, columnspan = 2, sticky = "ew", pady = (10, 0))
+
+# Option to skip the login for "Preview"
+ttk.Button(card, text = "Skip → Interests (dev)", command = lambda: show("interests")).grid(row = 7, column = 0, columnspan = 2, sticky = "ew", pady = (6, 0))
+
+for col in range(2):
+    card.grid_columnconfigure(col, weight = 1)
 
 for col in range(2):
     card.grid_columnconfigure(col, weight = 1)
@@ -85,6 +93,11 @@ for col in range(2):
 create = CreateAccountScreen(container, show_callback = show)
 create.grid(row = 0, column = 0, sticky = "nsew")
 screens["create"] = create
+
+# Interests
+interests = InterestsScreen(container, show_callback = show)
+interests.grid(row = 0, column = 0, sticky = "nsew")
+screens["interests"] = interests
 
 # Start on login
 show("login")

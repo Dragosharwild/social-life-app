@@ -30,7 +30,7 @@ class CreateAccountScreen(ttk.Frame):
         ttk.Label(wrap, text = "Email").grid(row = 1, column = 0, sticky = "w", pady = 4)
         ttk.Entry(wrap, textvariable = self.email, width = 35).grid(row = 1, column = 1, pady = 4)
 
-        ttk.Label(wrap, text = "New Username").grid(row = 2, column = 0, sticky = "w", pad = 4)
+        ttk.Label(wrap, text = "New Username").grid(row = 2, column = 0, sticky = "w", padx = 4)
         ttk.Entry(wrap, textvariable = self.username, width = 35).grid(row = 2, column = 1, pady = 4)
 
         ttk.Label(wrap, text = "New Password").grid(row = 3, column = 0, sticky = "w", pady = 4)
