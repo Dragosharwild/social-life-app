@@ -46,9 +46,15 @@ class FeedScreen(ttk.Frame):
         self.post_frame = ttk.Frame(self.canvas, padding=4)
 
         self.post_frame.bind("<Configure>", lambda e: self.canvas.configure(scrollregion=self.canvas.bbox("all")))
-        self.canvas.create_window((0, 0), window=self.post_frame, anchor="nw")
+        # Center posts in the canvas
+        self.canvas_window = self.canvas.create_window((0, 0), window=self.post_frame, anchor="n")
+        
+        def center_post_frame(event):
+            self.canvas.coords(self.canvas_window, event.width // 2, 0)
+            
+        body.bind("<Configure>", center_post_frame)
+        
         self.canvas.configure(yscrollcommand=scrollbar.set)
-
         self.canvas.grid(row=0, column=0, sticky="nsew")
         scrollbar.grid(row=0, column=1, sticky="ns")
 
@@ -68,8 +74,15 @@ class FeedScreen(ttk.Frame):
     def render_posts(self, posts):
         for w in self.post_frame.winfo_children():
             w.destroy()
-        for p in posts:
-            card = ttk.Frame(self.post_frame, padding=10, relief="ridge")
-            card.pack(fill="x", pady=6)
-            ttk.Label(card, text=p["bubble"], foreground="#666").pack(anchor="w")
-            ttk.Label(card, text=p["title"], font=("Segoe UI", 11, "bold")).pack(anchor="w")
+
+        # Make the card column expand
+        self.post_frame.grid_columnconfigure(0, weight=1)
+
+        for i, p in enumerate(posts):
+            card = ttk.Frame(self.post_frame, padding=16, relief="groove")
+            card.grid(row=i, column=0, pady=12, sticky="nsew")  # Card stretches in all directions
+            card.grid_columnconfigure(0, weight=1)
+            card.grid_rowconfigure(0, weight=1)
+            card.grid_rowconfigure(1, weight=1)
+            ttk.Label(card, text=p["bubble"], font=("Segoe UI", 11), foreground="#666").grid(row=0, column=0, sticky="ew")
+            ttk.Label(card, text=p["title"], font=("Segoe UI", 11, "bold")).grid(row=1, column=0, sticky="ew")
