@@ -1,57 +1,148 @@
+# import tkinter as tk
+# from tkinter import ttk, messagebox
+
+# def _centered_card(parent):
+#     for r in range(3):
+#         parent.grid_rowconfigure(r, weight = 1)
+#     for c in range(3):
+#         parent.grid_columnconfigure(c, weight = 1)
+#     card = ttk.Frame(parent, padding = 20, relief = "ridge")
+#     card.grid(row = 1, column = 1)
+#     return card
+
+# class CreateAccountScreen(ttk.Frame):
+#     """Separate screen for creating an account."""
+#     def __init__(self, parent, show_callback):
+#         super().__init__(parent)
+#         # function to switch screens
+#         self.show = show_callback
+
+#         wrap = _centered_card(self)
+
+#         ttk.Label(wrap, text = "Create an account", font = ("Segoe UI", 14, "bold")).grid(row = 0, column = 0, columnspan = 2, pady = (0, 12))
+
+#         self.email = tk.StringVar()
+#         self.username = tk.StringVar()
+#         self.password = tk.StringVar()
+#         self.confirm  = tk.StringVar()
+#         self.show_pwd = tk.BooleanVar(value = False)
+
+#         ttk.Label(wrap, text = "Email").grid(row = 1, column = 0, sticky = "w", pady = 4)
+#         ttk.Entry(wrap, textvariable = self.email, width = 35).grid(row = 1, column = 1, pady = 4)
+
+#         ttk.Label(wrap, text = "New Username").grid(row = 2, column = 0, sticky = "w", padx = 4)
+#         ttk.Entry(wrap, textvariable = self.username, width = 35).grid(row = 2, column = 1, pady = 4)
+
+#         ttk.Label(wrap, text = "New Password").grid(row = 3, column = 0, sticky = "w", pady = 4)
+#         self.pwd_entry = ttk.Entry(wrap, textvariable = self.password, show = "•", width = 35)
+#         self.pwd_entry.grid(row = 3, column = 1, pady = 4)
+
+#         ttk.Label(wrap, text = "Confirm Password").grid(row = 4, column = 0, sticky = "w", pady = 4)
+#         self.conf_entry = ttk.Entry(wrap, textvariable = self.confirm, show = "•", width = 35)
+#         self.conf_entry.grid(row = 4, column = 1, pady = 4)
+
+#         ttk.Checkbutton(
+#             wrap, text = "Show passwords", variable = self.show_pwd, command = self._toggle_pw
+#         ).grid(row = 5, column = 0, columnspan = 2, sticky = "w")
+
+#         btns = ttk.Frame(wrap)
+#         btns.grid(row = 6, column = 0, columnspan = 2, pady = 10, sticky = "ew")
+#         ttk.Button(btns, text = "Back", command = lambda: self.show("login")).pack(side = "left")
+#         ttk.Button(btns, text = "Create Account", command = self._create_clicked).pack(side = "right")
+
+#         for c in range(2):
+#             wrap.grid_columnconfigure(c, weight = 1)
+
+#     def _toggle_pw(self):
+#         show = "" if self.show_pwd.get() else "•"
+#         self.pwd_entry.configure(show=show)
+#         self.conf_entry.configure(show=show)
+
+#     def _create_clicked(self):
+#         if not all([
+#             self.email.get().strip(),
+#             self.username.get().strip(),
+#             self.password.get().strip(),
+#             self.confirm.get().strip()
+#         ]):
+#             messagebox.showwarning("Missing info", "Please fill out all fields.")
+#             return
+#         if self.password.get() != self.confirm.get():
+#             messagebox.showerror("Mismatch", "Passwords do not match.")
+#             return
+#         messagebox.showinfo("Account", "(mock) Account created!")
+#         self.show("login")
+
 import tkinter as tk
 from tkinter import ttk, messagebox
+import sqlite3
+
+DB_FILE = "circlesync.db"  # Database file
 
 def _centered_card(parent):
     for r in range(3):
-        parent.grid_rowconfigure(r, weight = 1)
+        parent.grid_rowconfigure(r, weight=1)
     for c in range(3):
-        parent.grid_columnconfigure(c, weight = 1)
-    card = ttk.Frame(parent, padding = 20, relief = "ridge")
-    card.grid(row = 1, column = 1)
+        parent.grid_columnconfigure(c, weight=1)
+    card = ttk.Frame(parent, padding=20, relief="ridge")
+    card.grid(row=1, column=1)
     return card
+
+# Create the accounts table if it doesn't exist
+def init_db():
+    conn = sqlite3.connect(DB_FILE)
+    c = conn.cursor()
+    c.execute("""
+        CREATE TABLE IF NOT EXISTS accounts (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            email TEXT NOT NULL,
+            username TEXT NOT NULL UNIQUE,
+            password TEXT NOT NULL
+        )
+    """)
+    conn.commit()
+    conn.close()
 
 class CreateAccountScreen(ttk.Frame):
     """Separate screen for creating an account."""
     def __init__(self, parent, show_callback):
         super().__init__(parent)
-        # function to switch screens
         self.show = show_callback
-
         wrap = _centered_card(self)
 
-        ttk.Label(wrap, text = "Create an account", font = ("Segoe UI", 14, "bold")).grid(row = 0, column = 0, columnspan = 2, pady = (0, 12))
+        ttk.Label(wrap, text="Create an account", font=("Segoe UI", 14, "bold")).grid(row=0, column=0, columnspan=2, pady=(0, 12))
 
         self.email = tk.StringVar()
         self.username = tk.StringVar()
         self.password = tk.StringVar()
-        self.confirm  = tk.StringVar()
-        self.show_pwd = tk.BooleanVar(value = False)
+        self.confirm = tk.StringVar()
+        self.show_pwd = tk.BooleanVar(value=False)
 
-        ttk.Label(wrap, text = "Email").grid(row = 1, column = 0, sticky = "w", pady = 4)
-        ttk.Entry(wrap, textvariable = self.email, width = 35).grid(row = 1, column = 1, pady = 4)
+        ttk.Label(wrap, text="Email").grid(row=1, column=0, sticky="w", pady=4)
+        ttk.Entry(wrap, textvariable=self.email, width=35).grid(row=1, column=1, pady=4)
 
-        ttk.Label(wrap, text = "New Username").grid(row = 2, column = 0, sticky = "w", padx = 4)
-        ttk.Entry(wrap, textvariable = self.username, width = 35).grid(row = 2, column = 1, pady = 4)
+        ttk.Label(wrap, text="New Username").grid(row=2, column=0, sticky="w", padx=4)
+        ttk.Entry(wrap, textvariable=self.username, width=35).grid(row=2, column=1, pady=4)
 
-        ttk.Label(wrap, text = "New Password").grid(row = 3, column = 0, sticky = "w", pady = 4)
-        self.pwd_entry = ttk.Entry(wrap, textvariable = self.password, show = "•", width = 35)
-        self.pwd_entry.grid(row = 3, column = 1, pady = 4)
+        ttk.Label(wrap, text="New Password").grid(row=3, column=0, sticky="w", pady=4)
+        self.pwd_entry = ttk.Entry(wrap, textvariable=self.password, show="•", width=35)
+        self.pwd_entry.grid(row=3, column=1, pady=4)
 
-        ttk.Label(wrap, text = "Confirm Password").grid(row = 4, column = 0, sticky = "w", pady = 4)
-        self.conf_entry = ttk.Entry(wrap, textvariable = self.confirm, show = "•", width = 35)
-        self.conf_entry.grid(row = 4, column = 1, pady = 4)
+        ttk.Label(wrap, text="Confirm Password").grid(row=4, column=0, sticky="w", pady=4)
+        self.conf_entry = ttk.Entry(wrap, textvariable=self.confirm, show="•", width=35)
+        self.conf_entry.grid(row=4, column=1, pady=4)
 
         ttk.Checkbutton(
-            wrap, text = "Show passwords", variable = self.show_pwd, command = self._toggle_pw
-        ).grid(row = 5, column = 0, columnspan = 2, sticky = "w")
+            wrap, text="Show passwords", variable=self.show_pwd, command=self._toggle_pw
+        ).grid(row=5, column=0, columnspan=2, sticky="w")
 
         btns = ttk.Frame(wrap)
-        btns.grid(row = 6, column = 0, columnspan = 2, pady = 10, sticky = "ew")
-        ttk.Button(btns, text = "Back", command = lambda: self.show("login")).pack(side = "left")
-        ttk.Button(btns, text = "Create Account", command = self._create_clicked).pack(side = "right")
+        btns.grid(row=6, column=0, columnspan=2, pady=10, sticky="ew")
+        ttk.Button(btns, text="Back", command=lambda: self.show("login")).pack(side="left")
+        ttk.Button(btns, text="Create Account", command=self._create_clicked).pack(side="right")
 
         for c in range(2):
-            wrap.grid_columnconfigure(c, weight = 1)
+            wrap.grid_columnconfigure(c, weight=1)
 
     def _toggle_pw(self):
         show = "" if self.show_pwd.get() else "•"
@@ -67,8 +158,31 @@ class CreateAccountScreen(ttk.Frame):
         ]):
             messagebox.showwarning("Missing info", "Please fill out all fields.")
             return
+
         if self.password.get() != self.confirm.get():
             messagebox.showerror("Mismatch", "Passwords do not match.")
             return
-        messagebox.showinfo("Account", "(mock) Account created!")
+
+        try:
+            conn = sqlite3.connect(DB_FILE)
+            c = conn.cursor()
+            c.execute("INSERT INTO accounts (email, username, password) VALUES (?, ?, ?)",
+                      (self.email.get(), self.username.get(), self.password.get()))
+            conn.commit()
+
+            # Confirmation message
+            messagebox.showinfo("Account", "Account created successfully!")
+
+            # Debug: print all accounts to console
+            c.execute("SELECT * FROM accounts")
+            print("Current accounts in DB:", c.fetchall())
+
+        except sqlite3.IntegrityError:
+            messagebox.showerror("Error", "Username already exists.")
+        finally:
+            conn.close()
+
         self.show("login")
+
+# Call this once before launching the app to ensure DB exists
+init_db()
