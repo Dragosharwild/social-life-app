@@ -3,9 +3,11 @@ from tkinter import ttk, messagebox
 from create_account import CreateAccountScreen
 from interests import InterestsScreen
 from feed import FeedScreen
-from feed import FeedScreen
 from create_bubble import CreateBubbleScreen
 from profile import ProfileScreen
+import db
+
+db.init_db()  # ensure table exists before UI starts
 
 root = tk.Tk()
 root.title("CircleSync")
@@ -79,8 +81,11 @@ def on_login():
     if not u or not p:
         messagebox.showwarning("Missing info", "Please enter both username/email and password.")
         return
-    # Now goes straight to Interests
-    show("interests")
+    if db.authenticate(u, p):
+        show("interests")
+    else:
+        messagebox.showerror("Login failed", "Invalid username/email or password.")
+
 
 ttk.Button(card, text = "Log In", command = on_login).grid(row = 6, column = 0, columnspan = 2, sticky = "ew", pady = (10, 0))
 
