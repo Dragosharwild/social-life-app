@@ -1,11 +1,9 @@
 import sqlite3
 
-conn = sqlite3.connect("accounts.db")
+conn = sqlite3.connect("circlesync.db")
 cursor = conn.cursor()
 
-cursor.execute("DROP TABLE IF EXISTS users")  # Deletes the users table
-cursor.execute("DROP TABLE IF EXISTS interests")
-cursor.execute("DROP TABLE IF EXISTS bubbles")
+cursor.execute("DROP TABLE IF EXISTS accounts")  # Deletes the users table
 conn.commit()
 conn.close()
 
