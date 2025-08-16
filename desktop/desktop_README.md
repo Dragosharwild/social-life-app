@@ -70,12 +70,16 @@ desktop/
 ├─ ui/
 │  ├─ screens/
 │  │  ├─ auth_screen.py           # sign up / login
-│  │  ├─ dashboard_screen.py      # my circles, search/join, create
-│  │  └─ circle_detail_screen.py  # creator, members, leave
+│  │  ├─ dashboard_screen.py      # interests (first-run) → then feed
+│  │  ├─ feed_screen.py           # home feed with mock posts
+│  │  ├─ create_bubble_screen.py  # create an interest bubble (placeholder)
+│  │  ├─ profile_screen.py        # user profile (placeholder)
+│  │  └─ bubble_detail_screen.py  # circle details (creator, members)
 │  └─ widgets/
 │     ├─ inputs.py                # labeled entries, password field
 │     ├─ lists.py                 # list/tree helpers
-│     └─ dialogs.py               # create-circle modal
+│     ├─ dialogs.py               # create-circle modal
+│     └─ sidebar.py               # persistent right-side navigation
 ├─ core/
 │  ├─ models.py                   # User, InnerCircle, Membership (dataclasses)
 │  ├─ ports.py                    # AuthRepo, CircleRepo interfaces
@@ -92,7 +96,7 @@ desktop/
 │  ├─ validators.py               # input validation helpers
 │  └─ logging.py                  # logger setup
 ├─ data/                          # runtime (gitignored)
-│  └─ sociallife.sqlite
+│  └─ circlesync.sqlite
 └─ tests/
    ├─ test_auth_service.py
    └─ test_circle_service.py
@@ -152,6 +156,6 @@ All stories include unit tests at the **service** layer and a manual QA checklis
 - [ ] Leave updates member count.
 - [ ] App restart preserves data (SQLite file exists and loads).
 
-**Demo flow:** sign up `alice` → create “UTRGV Chess” → sign up `bob` → search and join → open details: creator = `alice`, members = 2 → `bob` leaves → members = 1.
+**Demo flow:** sign up `alice` → create “aChess” → sign up `bob` → search and join → open details: creator = `alice`, members = 2 → `bob` leaves → members = 1.
 
 ---

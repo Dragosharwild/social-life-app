@@ -208,3 +208,5 @@ __marimo__/
 
 # userdata stuff
 data/
+*.db
+*.sqlite
