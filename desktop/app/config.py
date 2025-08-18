@@ -4,10 +4,8 @@ Application configuration for the Desktop client.
 This centralizes paths and feature flags so other layers don't hard-code
 filesystem or environment details.
 """
-from __future__ import annotations
 
 from pathlib import Path
-
 
 # Root folder for the desktop app (this file lives under desktop/app/)
 DESKTOP_ROOT = Path(__file__).resolve().parents[1]
@@ -21,7 +19,7 @@ DB_FILE = DATA_DIR / "circlesync.sqlite"
 
 # Feature flags (simple booleans for now)
 FEATURES = {
-	"enable_search": True,
+    "enable_search": True,
 }
 
 # UI settings
