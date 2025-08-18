@@ -159,3 +159,23 @@ All stories include unit tests at the **service** layer and a manual QA checklis
 **Demo flow:** sign up `alice` → create “aChess” → sign up `bob` → search and join → open details: creator = `alice`, members = 2 → `bob` leaves → members = 1.
 
 ---
+
+## 8) DB Inspector (CLI mode)
+
+You can start a small terminal tool instead of the GUI to inspect or delete the local SQLite database used by the desktop app.
+
+How to run (Windows PowerShell):
+
+```powershell
+python .\desktop\main.py --cli
+```
+
+Features:
+- Show DB path, existence, size, and row counts per table.
+- View up to N rows from a chosen table (or all tables).
+- Delete the database file (with a confirmation prompt).
+
+Notes:
+- The DB lives at `desktop/data/circlesync.sqlite`.
+- The CLI won’t create a new DB; if it doesn’t exist yet, you’ll see “no tables”.
+- To recreate the DB schema, just start the GUI once (it auto-initializes tables).
