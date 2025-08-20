@@ -1,4 +1,4 @@
-# Social Life – Desktop Application (Tkinter)
+# CircleSync – Desktop Application (Tkinter)
 
 > **Component:** Desktop client for the Social Life project  
 > **Focus:** Productivity-first management of *Inner Circles* (communities)  
@@ -9,7 +9,7 @@
 ## 1) Purpose & Scope
 
 This application is the **desktop** part of a two–component system (Desktop + Web).  
-It delivers a minimal, testable MVP centered on **Inner Circles** — self‑contained communities created around a common interest. The desktop app focuses on **CRUD** operations and simple list‑based workflows suitable for Tkinter.
+It delivers a minimal, testable MVP centered on **Inner Circles** — self-contained communities centered around a common interest. The desktop app focuses on **CRUD** operations and simple list‑based workflows suitable for Tkinter.
 
 ### Goals for the Desktop MVP
 - Account **Sign Up** and **Login**.
@@ -79,7 +79,7 @@ desktop/
 │     ├─ inputs.py                # labeled entries, password field
 │     ├─ lists.py                 # list/tree helpers
 │     ├─ dialogs.py               # create-circle modal
-│     └─ sidebar.py               # persistent right-side navigation
+│     └─ sidebar.py               # persistent sidebar navigation
 ├─ core/
 │  ├─ models.py                   # User, InnerCircle, Membership (dataclasses)
 │  ├─ ports.py                    # AuthRepo, CircleRepo interfaces
@@ -121,6 +121,7 @@ desktop/
 
 ## 5) Security & Privacy
 
+- Passwords are **hashed** using SHA256.
 - Credentials are never logged. Logs avoid PII.
 - Database file is local; treat `desktop/data/` as user‑private data.
 
@@ -156,7 +157,7 @@ All stories include unit tests at the **service** layer and a manual QA checklis
 - [ ] Leave updates member count.
 - [ ] App restart preserves data (SQLite file exists and loads).
 
-**Demo flow:** sign up `alice` → create “aChess” → sign up `bob` → search and join → open details: creator = `alice`, members = 2 → `bob` leaves → members = 1.
+**Demo flow:** sign up `alice` → create “Chess” → sign up `bob` → search and join → open details: creator = `alice`, members = 2 → `bob` leaves → members = 1.
 
 ---
 
