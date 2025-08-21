@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% block title %}{{ circle.name }} · Circle{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <div>
+    <h2 class="h4 mb-1">{{ circle.name }}</h2>
+    <div class="text-muted small">
+      {% if circle.is_public %}Public{% else %}Private{% endif %} • {{ circle.members.count }} member{{ circle.members.count|pluralize }}
+    </div>
+  </div>
+  <div class="d-flex gap-2">
+    <a class="btn btn-outline-primary disabled" aria-disabled="true">Join (soon)</a>
+    <a class="btn btn-primary disabled" aria-disabled="true">Create Post (soon)</a>
+  </div>
+</div>
+
+<div class="card p-3 shadow-sm mb-3">
+  <p class="mb-0 text-muted">{{ circle.description|default:"No description yet." }}</p>
+</div>
+
+<div class="card p-3 shadow-sm">
+  <h5 class="mb-2">Posts</h5>
+  <p class="text-muted mb-0">Post list will appear here once we add the Post model.</p>
+</div>
+{% endblock %}

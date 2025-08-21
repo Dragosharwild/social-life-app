@@ -1,16 +1,14 @@
-from django.shortcuts import render
+from django.views.generic import ListView, DetailView
+from .models import Circle
 
-def home(request):
-    return render(request, "circles/index.html")
+class CircleListView(ListView):
+    model = Circle
+    template_name = "circles/circle_list.html"
+    context_object_name = "circles"
+    paginate_by = 20
+    ordering = ["name"]
 
-def activities_list(request):
-    return render(request, "circles/activities_list.html", {"activities": []})
-
-def events_calendar(request):
-    return render(request, "circles/events_calendar.html")
-
-def board(request):
-    return render(request, "circles/board.html", {"posts": []})
-
-def contacts(request):
-    return render(request, "circles/contacts.html", {"contacts": []})
+class CircleDetailView(DetailView):
+    model = Circle
+    template_name = "circles/circle_detail.html"
+    context_object_name = "circle"
