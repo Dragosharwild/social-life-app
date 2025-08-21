@@ -10,7 +10,7 @@
   </div>
   <div class="d-flex gap-2">
     <a class="btn btn-outline-primary disabled" aria-disabled="true">Join (soon)</a>
-    <a class="btn btn-primary disabled" aria-disabled="true">Create Post (soon)</a>
+    <a class="btn btn-primary" href="{% url 'circles:post_create' slug=circle.slug %}">Create Post</a>
   </div>
 </div>
 
@@ -20,6 +20,26 @@
 
 <div class="card p-3 shadow-sm">
   <h5 class="mb-2">Posts</h5>
-  <p class="text-muted mb-0">Post list will appear here once we add the Post model.</p>
+  {% if posts %}
+    <div class="list-group list-group-flush">
+      {% for p in posts %}
+      <a class="list-group-item list-group-item-action" href="{% url 'circles:post_detail' slug=circle.slug pk=p.pk %}">
+        <div class="d-flex justify-content-between">
+          <strong>{{ p.title }}</strong>
+          <small class="text-muted">{{ p.created_at|date:"M j, Y, g:i a" }}</small>
+        </div>
+        {% if p.link_url %}
+          <div class="small text-muted">{{ p.link_url }}</div>
+        {% endif %}
+        {% if p.body %}
+          <div class="text-muted small mt-1">{{ p.body|truncatewords:30 }}</div>
+        {% endif %}
+        <div class="small text-muted mt-1">by {{ p.author }}</div>
+      </a>
+      {% endfor %}
+    </div>
+  {% else %}
+    <p class="text-muted mb-0">No posts yet.</p>
+  {% endif %}
 </div>
 {% endblock %}

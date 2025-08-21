@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+{% block title %}Create Post · {{ circle.name }}{% endblock %}
+{% block content %}
+<h2 class="h4 mb-3">Create a post in {{ circle.name }}</h2>
+<form method="post" class="card p-3 shadow-sm">
+  {% csrf_token %}
+  {{ form.as_p }}
+  <div class="d-flex gap-2">
+    <button class="btn btn-primary">Post</button>
+    <a href="{% url 'circles:circle_detail' slug=circle.slug %}" class="btn btn-outline-secondary">Cancel</a>
+  </div>
+</form>
+{% endblock %}

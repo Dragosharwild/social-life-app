@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+{% block title %}Activity{% endblock %}
+{% block content %}
+<h2 class="h4 mb-3">{{ form.instance.pk|yesno:"Edit Activity,New Activity" }}</h2>
+<form method="post" class="card p-3 shadow-sm">
+  {% csrf_token %}
+  {{ form.as_p }}
+  <div class="d-flex gap-2">
+    <button class="btn btn-primary">Save</button>
+    <a class="btn btn-outline-secondary" href="{% url 'circles:activities_list' %}">Cancel</a>
+  </div>
+</form>
+{% endblock %}

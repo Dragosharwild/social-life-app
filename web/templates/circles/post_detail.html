@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+{% block title %}{{ post.title }}{% endblock %}
+{% block content %}
+<h2 class="h4">{{ post.title }}</h2>
+<div class="small text-muted">by {{ post.author }} • {{ post.created_at|date:"M j, Y, g:i a" }}</div>
+{% if post.link_url %}
+  <p><a href="{{ post.link_url }}" target="_blank">{{ post.link_url }}</a></p>
+{% endif %}
+{% if post.body %}
+  <p>{{ post.body|linebreaksbr }}</p>
+{% else %}
+  <p class="text-muted">No text content.</p>
+{% endif %}
+{% endblock %}
