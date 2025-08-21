@@ -19,3 +19,11 @@ class ActivityAdmin(admin.ModelAdmin):
     list_display = ("title", "day_of_week", "start_time", "end_time", "location", "updated_at")
     list_filter = ("day_of_week",)
     search_fields = ("title", "location")
+    
+from .models import Circle, Post, Activity, Comment  # add Comment
+
+@admin.register(Comment)
+class CommentAdmin(admin.ModelAdmin):
+    list_display = ("post", "author", "created_at")
+    search_fields = ("body", "author__username", "post__title")
+    list_filter = ("created_at",)

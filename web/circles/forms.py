@@ -1,6 +1,13 @@
 from django import forms
-from .models import Activity, Post
+from .models import Activity, Post, Comment
 
+class CommentForm(forms.ModelForm):
+    class Meta:
+        model = Comment
+        fields = ["body"]
+        widgets = {
+            "body": forms.Textarea(attrs={"rows": 3, "placeholder": "Add a comment…", "class": "form-control"}),
+        }
 class ActivityForm(forms.ModelForm):
     class Meta:
         model = Activity

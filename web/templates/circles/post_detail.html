@@ -1,14 +1,61 @@
 {% extends "base.html" %}
 {% block title %}{{ post.title }}{% endblock %}
 {% block content %}
-<h2 class="h4">{{ post.title }}</h2>
-<div class="small text-muted">by {{ post.author }} • {{ post.created_at|date:"M j, Y, g:i a" }}</div>
-{% if post.link_url %}
-  <p><a href="{{ post.link_url }}" target="_blank">{{ post.link_url }}</a></p>
-{% endif %}
-{% if post.body %}
-  <p>{{ post.body|linebreaksbr }}</p>
-{% else %}
-  <p class="text-muted">No text content.</p>
-{% endif %}
+
+<nav class="mb-3">
+  <a class="text-decoration-none" href="{% url 'circles:circle_detail' slug=post.circle.slug %}">
+    ← Back to {{ post.circle.name }}
+  </a>
+</nav>
+
+<div class="card p-3 shadow-sm mb-3">
+  <h2 class="h4 mb-1">{{ post.title }}</h2>
+  <div class="small text-muted">by {{ post.author }} • {{ post.created_at|date:"M j, Y, g:i a" }}</div>
+
+  {% if post.link_url %}
+    <p class="mb-2"><a href="{{ post.link_url }}" target="_blank" rel="noopener">{{ post.link_url }}</a></p>
+  {% endif %}
+
+  {% if post.body %}
+    <p class="mb-0">{{ post.body|linebreaksbr }}</p>
+  {% else %}
+    <p class="text-muted mb-0">No text content.</p>
+  {% endif %}
+</div>
+
+<hr class="my-4">
+
+<div class="card p-3 shadow-sm">
+  <h5 class="mb-3">Comments ({{ comments|length }})</h5>
+
+  {% if comments %}
+    <div class="list-group list-group-flush mb-3">
+      {% for c in comments %}
+      <div class="list-group-item">
+        <div class="small text-muted mb-1">
+          by {{ c.author }} • {{ c.created_at|date:"M j, Y, g:i a" }}
+        </div>
+        <div>{{ c.body|linebreaksbr }}</div>
+      </div>
+      {% endfor %}
+    </div>
+  {% else %}
+    <p class="text-muted">No comments yet. Be the first!</p>
+  {% endif %}
+
+  {% if request.user.is_authenticated %}
+    <form method="post" action="{% url 'circles:comment_create' slug=post.circle.slug pk=post.pk %}">
+      {% csrf_token %}
+      <div class="mb-2">
+        {{ comment_form.body }}
+      </div>
+      <button class="btn btn-primary btn-sm">Comment</button>
+    </form>
+  {% else %}
+    <a class="btn btn-outline-primary btn-sm" href="/admin/login/?next={{ request.path }}">
+      Log in to comment
+    </a>
+  {% endif %}
+</div>
+
 {% endblock %}

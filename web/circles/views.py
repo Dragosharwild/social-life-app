@@ -5,8 +5,9 @@ from django.views.generic import (
 )
 from django.contrib.auth.mixins import LoginRequiredMixin
 
-from .models import Circle, Post, Activity
-from .forms import PostForm, ActivityForm
+from .models import Circle, Post, Activity, Comment
+from .forms import PostForm, ActivityForm, CommentForm
+from django.shortcuts import redirect
 
 
 # Home
@@ -45,6 +46,26 @@ class PostDetailView(DetailView):
             circle__slug=self.kwargs["slug"]
         )
 
+    def get_context_data(self, **kwargs):
+        ctx = super().get_context_data(**kwargs)
+        ctx["comments"] = self.object.comments.select_related("author")
+        ctx["comment_form"] = CommentForm()
+        return ctx
+
+class CommentCreateView(LoginRequiredMixin, CreateView):
+    model = Comment
+    form_class = CommentForm
+    template_name = "circles/comment_form.html"  # not used; we post from post_detail
+
+    def dispatch(self, request, *args, **kwargs):
+        self.post_obj = get_object_or_404(Post.objects.select_related("circle"), pk=kwargs["pk"], circle__slug=kwargs["slug"])
+        return super().dispatch(request, *args, **kwargs)
+
+    def form_valid(self, form):
+        form.instance.post = self.post_obj
+        form.instance.author = self.request.user
+        form.save()
+        return redirect("circles:post_detail", slug=self.post_obj.circle.slug, pk=self.post_obj.pk)
 
 class PostCreateView(LoginRequiredMixin, CreateView):
     model = Post

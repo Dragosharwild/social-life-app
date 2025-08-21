@@ -19,9 +19,11 @@ urlpatterns = [
     path("activities/new/", views.ActivityCreateView.as_view(), name="activity_create"),
     path("activities/<int:pk>/edit/", views.ActivityUpdateView.as_view(), name="activity_update"),
     path("activities/<int:pk>/delete/", views.ActivityDeleteView.as_view(), name="activity_delete"),
+    
+    # Comment
+    path("c/<slug:slug>/p/<int:pk>/comment/", views.CommentCreateView.as_view(), name="comment_create"),
 
     # Existing pages
-    path("activities/", views.activities_list, name="activities_list"),
     path("events/", views.events_calendar, name="events_calendar"),
     path("board/", views.board, name="board"),
     path("contacts/", views.contacts, name="contacts"),
