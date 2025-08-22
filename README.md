@@ -79,8 +79,6 @@ pip install -r requirements.txt
 
 ### 4. Running the applications
 
-Run the desktop application and the database management tool.
-
 Desktop app (GUI):
 
 ```bash
@@ -99,6 +97,14 @@ Expected behavior: Starts an interactive terminal menu to:
 - Show DB summary (path, size, tables, row counts)
 - View table rows with an optional limit
 - Delete the database file (with confirmation)
+
+Web App (Browser):
+
+```bash
+python web/manage.py migrate
+python web/manage.py runserver
+```
+Expected behavior: Lauches the web server on http://127.0.0.1:8000/.
 
 ## Requirements
 ### Functional Requirements
