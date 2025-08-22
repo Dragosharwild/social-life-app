@@ -4,19 +4,12 @@
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#nav">
       <span class="navbar-toggler-icon"></span>
     </button>
-
     <div id="nav" class="collapse navbar-collapse">
       <ul class="navbar-nav ms-auto">
-        <li class="nav-item"><a class="nav-link" href="{% url 'circles:index' %}">Home</a></li>
-        <li class="nav-item"><a class="nav-link" href="{% url 'circles:circle_list' %}">Circles</a></li>
         <li class="nav-item"><a class="nav-link" href="{% url 'circles:activities_list' %}">Activities</a></li>
-
-        {# If you ever want to keep placeholders without breaking URLs, use the comment tag so Django won't parse inside: #}
-        {% comment %}
         <li class="nav-item"><a class="nav-link" href="{% url 'circles:events_calendar' %}">Events</a></li>
         <li class="nav-item"><a class="nav-link" href="{% url 'circles:board' %}">Bulletin Board</a></li>
         <li class="nav-item"><a class="nav-link" href="{% url 'circles:contacts' %}">Emergency</a></li>
-        {% endcomment %}
       </ul>
     </div>
   </div>
