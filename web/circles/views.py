@@ -19,6 +19,17 @@ def home(request):
     return render(request, "circles/index.html")
 
 
+# Placeholder views for navbar
+def events_calendar(request):
+    return render(request, "circles/placeholder.html", {"title": "Events Calendar"})
+
+def bulletin_board(request):
+    return render(request, "circles/placeholder.html", {"title": "Bulletin Board"})
+
+def emergency_contacts(request):
+    return render(request, "circles/placeholder.html", {"title": "Emergency Contacts"})
+
+
 # Circles
 class CircleListView(ListView):
     model = Circle

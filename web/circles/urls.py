@@ -1,7 +1,7 @@
 from django.urls import path
 from . import views
 
-app_name = "circles"
+app_name = "circles"  # This line is essential for namespace
 
 urlpatterns = [
     # Home
@@ -31,4 +31,10 @@ urlpatterns = [
     path("activities/new/", views.ActivityCreateView.as_view(), name="activity_create"),
     path("activities/<int:pk>/edit/", views.ActivityUpdateView.as_view(), name="activity_update"),
     path("activities/<int:pk>/delete/", views.ActivityDeleteView.as_view(), name="activity_delete"),
+    
+    # Placeholder views for navbar
+    path("events/", views.events_calendar, name="events_calendar"),
+    path("board/", views.bulletin_board, name="board"),
+    path("emergency/", views.emergency_contacts, name="contacts"),
+    
 ]
