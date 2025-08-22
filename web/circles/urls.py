@@ -37,4 +37,10 @@ urlpatterns = [
     path("board/", views.bulletin_board, name="board"),
     path("emergency/", views.emergency_contacts, name="contacts"),
     
+    # User Registration (Sign Up)
+    path("signup/", views.signup, name="signup"),
+    
+    # Search
+    path("search/", views.search, name="search"),
+    
 ]
