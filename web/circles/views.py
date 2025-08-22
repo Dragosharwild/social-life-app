@@ -13,6 +13,12 @@ from .models import (
 )
 from .forms import PostForm, ActivityForm, CommentForm
 
+from django.contrib.auth import login, authenticate
+from django.contrib.auth.forms import UserCreationForm
+from django.shortcuts import render, redirect
+
+from django.db.models import Q
+
 
 # Home
 def home(request):
@@ -170,3 +176,51 @@ class ActivityDeleteView(DeleteView):
     model = Activity
     template_name = "circles/activity_confirm_delete.html"
     success_url = reverse_lazy("circles:activities_list")
+    
+# User Registration (Sign Up)
+def signup(request):
+    if request.method == 'POST':
+        form = UserCreationForm(request.POST)
+        if form.is_valid():
+            form.save()
+            username = form.cleaned_data.get('username')
+            raw_password = form.cleaned_data.get('password1')
+            user = authenticate(username=username, password=raw_password)
+            login(request, user)
+            return redirect('circles:index')
+    else:
+        form = UserCreationForm()
+    return render(request, 'registration/signup.html', {'form': form})
+
+# Search Functionality
+def search(request):
+    query = request.GET.get('q', '')
+    results = {
+        'circles': [],
+        'posts': [],
+        'activities': [],
+    }
+    
+    if query:
+        # Search Circles
+        results['circles'] = Circle.objects.filter(
+            Q(name__icontains=query) |
+            Q(description__icontains=query)
+        )[:5]
+        
+        # Search posts
+        results['posts'] = Post.objects.filter(
+            Q(title__icontains=query) |
+            Q(body__icontains=query)
+        ).select_related('circle', 'author')[:5]
+        
+        # Search Activities
+        results['activities'] = Activity.objects.filter(
+            Q(title__icontains=query) |
+            Q(location__icontains=query)
+        )[:5]
+        
+    return render(request, 'circles/search_results.html', {
+        'query': query,
+        'results': results
+    })
