@@ -1,17 +1,16 @@
 class DomainError(Exception):
-	pass
+    pass
 
 
 class DuplicateUser(DomainError):
-	def __init__(self, field: str):
-		super().__init__(f"That {field} is already taken.")
-		self.field = field
+    def __init__(self, field: str):
+        super().__init__(f"That {field} is already taken.")
+        self.field = field
 
 
 class AuthFailed(DomainError):
-	pass
+    pass
 
 
 class NotFound(DomainError):
-	pass
-
+    pass
