@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Circle, Post, Activity, Vote
+from .models import Circle, Post, Activity, Vote, Membership
 
 @admin.register(Circle)
 class CircleAdmin(admin.ModelAdmin):
@@ -33,3 +33,9 @@ class VoteAdmin(admin.ModelAdmin):
     list_display = ("post", "user", "value", "created_at")
     list_filter = ("value",)
     search_fields = ("post__title", "user__username")
+
+@admin.register(Membership)
+class MembershipAdmin(admin.ModelAdmin):
+    list_display = ("circle", "user", "role", "created_at")
+    list_filter = ("role",)
+    search_fields = ("circle__name", "user__username")

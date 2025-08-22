@@ -37,6 +37,26 @@ class Circle(TimeStampedModel):
     def get_absolute_url(self):
         return reverse("circles:circle_detail", kwargs={"slug": self.slug})
 
+class Membership(TimeStampedModel):
+    MEMBER = "member"
+    MOD = "mod"
+    OWNER = "owner"
+    ROLES = (
+        (MEMBER, "Member"),
+        (MOD, "Moderator"),
+        (OWNER, "Owner"),
+    )
+
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="circle_memberships")
+    circle = models.ForeignKey(Circle, on_delete=models.CASCADE, related_name="memberships")
+    role = models.CharField(max_length=12, choices=ROLES, default=MEMBER)
+
+    class Meta:
+        unique_together = ("user", "circle")
+
+    def __str__(self):
+        return f"{self.user} in {self.circle} as {self.role}"
+
 
 class Activity(TimeStampedModel):
     DAYS = [

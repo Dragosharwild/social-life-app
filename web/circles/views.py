@@ -1,14 +1,18 @@
-from django.shortcuts import render, get_object_or_404, redirect
+from django.shortcuts import render, get_object_or_404
 from django.urls import reverse_lazy
 from django.views.generic import (
     ListView, DetailView, CreateView, UpdateView, DeleteView
 )
-from django.contrib.auth.mixins import LoginRequiredMixin
 from django.views import View
 from django.http import HttpResponseRedirect
+from django.contrib.auth.mixins import LoginRequiredMixin
 
-from .models import Circle, Post, Activity, Comment, Vote
+from .models import (
+    Circle, Post, Activity,
+    Comment, Vote, Membership
+)
 from .forms import PostForm, ActivityForm, CommentForm
+
 
 # Home
 def home(request):
@@ -31,7 +35,15 @@ class CircleDetailView(DetailView):
 
     def get_context_data(self, **kwargs):
         ctx = super().get_context_data(**kwargs)
+        # recent posts
         ctx["posts"] = self.object.posts.select_related("author")[:25]
+        # membership info
+        user = self.request.user
+        is_member = False
+        if user.is_authenticated:
+            is_member = self.object.memberships.filter(user=user).exists()
+        ctx["is_member"] = is_member
+        ctx["member_count"] = self.object.memberships.count()
         return ctx
 
 
@@ -52,20 +64,6 @@ class PostDetailView(DetailView):
         ctx["comment_form"] = CommentForm()
         return ctx
 
-class CommentCreateView(LoginRequiredMixin, CreateView):
-    model = Comment
-    form_class = CommentForm
-    template_name = "circles/comment_form.html"  # not used; we post from post_detail
-
-    def dispatch(self, request, *args, **kwargs):
-        self.post_obj = get_object_or_404(Post.objects.select_related("circle"), pk=kwargs["pk"], circle__slug=kwargs["slug"])
-        return super().dispatch(request, *args, **kwargs)
-
-    def form_valid(self, form):
-        form.instance.post = self.post_obj
-        form.instance.author = self.request.user
-        form.save()
-        return redirect("circles:post_detail", slug=self.post_obj.circle.slug, pk=self.post_obj.pk)
 
 class PostCreateView(LoginRequiredMixin, CreateView):
     model = Post
@@ -86,15 +84,54 @@ class PostCreateView(LoginRequiredMixin, CreateView):
         ctx["circle"] = self.circle
         return ctx
 
+
+# Comments
+class CommentCreateView(LoginRequiredMixin, CreateView):
+    model = Comment
+    form_class = CommentForm
+    template_name = "circles/comment_form.html" 
+
+    def dispatch(self, request, *args, **kwargs):
+        self.post_obj = get_object_or_404(
+            Post.objects.select_related("circle"),
+            pk=kwargs["pk"],
+            circle__slug=kwargs["slug"],
+        )
+        return super().dispatch(request, *args, **kwargs)
+
+    def form_valid(self, form):
+        form.instance.post = self.post_obj
+        form.instance.author = self.request.user
+        form.save()
+        return HttpResponseRedirect(self.post_obj.get_absolute_url())
+
+
+# Voting
 class PostVoteView(LoginRequiredMixin, View):
     def post(self, request, slug, pk, value):
         post = get_object_or_404(Post, pk=pk, circle__slug=slug)
-        vote, created = Vote.objects.update_or_create(
+        Vote.objects.update_or_create(
             user=request.user,
             post=post,
-            defaults={"value": value},
+            defaults={"value": int(value)},
         )
         return HttpResponseRedirect(post.get_absolute_url())
+
+
+# Membership (join/leave circles)
+class JoinCircleView(LoginRequiredMixin, View):
+    def post(self, request, slug):
+        circle = get_object_or_404(Circle, slug=slug)
+        Membership.objects.get_or_create(user=request.user, circle=circle)
+        return HttpResponseRedirect(circle.get_absolute_url())
+
+
+class LeaveCircleView(LoginRequiredMixin, View):
+    def post(self, request, slug):
+        circle = get_object_or_404(Circle, slug=slug)
+        Membership.objects.filter(user=request.user, circle=circle).delete()
+        return HttpResponseRedirect(circle.get_absolute_url())
+
 
 # Activities CRUD
 class ActivityListView(ListView):

@@ -22,6 +22,10 @@ urlpatterns = [
     path("c/<slug:slug>/p/<int:pk>/upvote/", views.PostVoteView.as_view(), {"value": 1}, name="post_upvote"),
     path("c/<slug:slug>/p/<int:pk>/downvote/", views.PostVoteView.as_view(), {"value": -1}, name="post_downvote"),
 
+    # Membership
+    path("c/<slug:slug>/join/", views.JoinCircleView.as_view(), name="circle_join"),
+    path("c/<slug:slug>/leave/", views.LeaveCircleView.as_view(), name="circle_leave"),
+
     # Activities CRUD
     path("activities/", views.ActivityListView.as_view(), name="activities_list"),
     path("activities/new/", views.ActivityCreateView.as_view(), name="activity_create"),
