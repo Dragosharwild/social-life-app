@@ -161,14 +161,14 @@ class ActivityListView(ListView):
 class ActivityCreateView(CreateView):
     model = Activity
     form_class = ActivityForm
-    template_name = "circles/activity_form.html"
+    template_name = "circles/activities_form.html"
     success_url = reverse_lazy("circles:activities_list")
 
 
 class ActivityUpdateView(UpdateView):
     model = Activity
     form_class = ActivityForm
-    template_name = "circles/activity_form.html"
+    template_name = "circles/activities_form.html"
     success_url = reverse_lazy("circles:activities_list")
 
 
