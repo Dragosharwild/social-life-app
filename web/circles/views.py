@@ -1,14 +1,14 @@
-from django.shortcuts import render, get_object_or_404
+from django.shortcuts import render, get_object_or_404, redirect
 from django.urls import reverse_lazy
 from django.views.generic import (
     ListView, DetailView, CreateView, UpdateView, DeleteView
 )
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.views import View
+from django.http import HttpResponseRedirect
 
-from .models import Circle, Post, Activity, Comment
+from .models import Circle, Post, Activity, Comment, Vote
 from .forms import PostForm, ActivityForm, CommentForm
-from django.shortcuts import redirect
-
 
 # Home
 def home(request):
@@ -86,6 +86,15 @@ class PostCreateView(LoginRequiredMixin, CreateView):
         ctx["circle"] = self.circle
         return ctx
 
+class PostVoteView(LoginRequiredMixin, View):
+    def post(self, request, slug, pk, value):
+        post = get_object_or_404(Post, pk=pk, circle__slug=slug)
+        vote, created = Vote.objects.update_or_create(
+            user=request.user,
+            post=post,
+            defaults={"value": value},
+        )
+        return HttpResponseRedirect(post.get_absolute_url())
 
 # Activities CRUD
 class ActivityListView(ListView):

@@ -1,5 +1,5 @@
 from django.db import models
-from django.conf import settings
+from django.db.models import Sum
 from django.contrib.auth import get_user_model
 from django.utils.text import slugify
 from django.urls import reverse
@@ -38,17 +38,6 @@ class Circle(TimeStampedModel):
         return reverse("circles:circle_detail", kwargs={"slug": self.slug})
 
 
-class Comment(TimeStampedModel):
-    post = models.ForeignKey(Post, on_delete=models.CASCADE, related_name="comments")
-    author = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="comments")
-    body = models.TextField()
-
-    class Meta:
-        ordering = ["created_at"]  # oldest first for natural reading
-
-    def __str__(self):
-        return f"Comment by {self.author} on {self.post}"
-
 class Activity(TimeStampedModel):
     DAYS = [
         (0, "Monday"), (1, "Tuesday"), (2, "Wednesday"),
@@ -63,13 +52,14 @@ class Activity(TimeStampedModel):
     def __str__(self):
         return f"{self.title} ({self.get_day_of_week_display()})"
 
+
 class Post(TimeStampedModel):
     circle = models.ForeignKey(Circle, on_delete=models.CASCADE, related_name="posts")
     author = models.ForeignKey(User, on_delete=models.CASCADE, related_name="posts")
     title = models.CharField(max_length=160)
     body = models.TextField(blank=True)
     link_url = models.URLField(blank=True)
-    score = models.IntegerField(default=0)  # for future voting
+    score = models.IntegerField(default=0)  # optional legacy field; display uses score_total
 
     class Meta:
         ordering = ["-created_at"]
@@ -79,3 +69,41 @@ class Post(TimeStampedModel):
 
     def get_absolute_url(self):
         return reverse("circles:post_detail", kwargs={"slug": self.circle.slug, "pk": self.pk})
+
+    @property
+    def score_total(self) -> int:
+        """Sum of all votes (+1/-1). Falls back to 0 if no votes."""
+        return self.votes.aggregate(total=Sum("value"))["total"] or 0
+
+
+class Comment(TimeStampedModel):
+    # Use string FK to avoid NameError if Post isn't loaded yet
+    post = models.ForeignKey("Post", on_delete=models.CASCADE, related_name="comments")
+    author = models.ForeignKey(User, on_delete=models.CASCADE, related_name="comments")
+    body = models.TextField()
+
+    class Meta:
+        ordering = ["created_at"]
+
+    def __str__(self):
+        return f"Comment by {self.author} on {self.post}"
+
+
+class Vote(TimeStampedModel):
+    UPVOTE = 1
+    DOWNVOTE = -1
+    VALUES = (
+        (UPVOTE, "Upvote"),
+        (DOWNVOTE, "Downvote"),
+    )
+
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="votes")
+    # String FK avoids load-order issues with Post
+    post = models.ForeignKey("Post", on_delete=models.CASCADE, related_name="votes")
+    value = models.SmallIntegerField(choices=VALUES)
+
+    class Meta:
+        unique_together = ("user", "post")
+
+    def __str__(self):
+        return f"{self.user} voted {self.get_value_display()} on {self.post}"

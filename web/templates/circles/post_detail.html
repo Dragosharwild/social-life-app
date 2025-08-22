@@ -9,22 +9,45 @@
 </nav>
 
 <div class="card p-3 shadow-sm mb-3">
-  <h2 class="h4 mb-1">{{ post.title }}</h2>
-  <div class="small text-muted">by {{ post.author }} • {{ post.created_at|date:"M j, Y, g:i a" }}</div>
+  <div class="d-flex justify-content-between align-items-start">
+    <div class="flex-grow-1">
+      <h2 class="h4 mb-1">{{ post.title }}</h2>
+      <div class="small text-muted">by {{ post.author }} • {{ post.created_at|date:"M j, Y, g:i a" }}</div>
 
-  {% if post.link_url %}
-    <p class="mb-2"><a href="{{ post.link_url }}" target="_blank" rel="noopener">{{ post.link_url }}</a></p>
-  {% endif %}
+      {% if post.link_url %}
+        <p class="mb-2"><a href="{{ post.link_url }}" target="_blank" rel="noopener">{{ post.link_url }}</a></p>
+      {% endif %}
 
-  {% if post.body %}
-    <p class="mb-0">{{ post.body|linebreaksbr }}</p>
-  {% else %}
-    <p class="text-muted mb-0">No text content.</p>
-  {% endif %}
+      {% if post.body %}
+        <p class="mb-0">{{ post.body|linebreaksbr }}</p>
+      {% else %}
+        <p class="text-muted mb-0">No text content.</p>
+      {% endif %}
+    </div>
+
+    <!-- Voting -->
+    <div class="ms-3 text-center">
+      {% if request.user.is_authenticated %}
+        <form method="post" action="{% url 'circles:post_upvote' slug=post.circle.slug pk=post.pk %}" class="mb-1">
+          {% csrf_token %}
+          <button class="btn btn-sm btn-outline-success">⬆ Upvote</button>
+        </form>
+        <div class="fw-bold">Score: {{ post.score_total }}</div>
+        <form method="post" action="{% url 'circles:post_downvote' slug=post.circle.slug pk=post.pk %}" class="mt-1">
+          {% csrf_token %}
+          <button class="btn btn-sm btn-outline-danger">⬇ Downvote</button>
+        </form>
+      {% else %}
+        <div class="fw-bold mb-1">Score: {{ post.score_total }}</div>
+        <a class="btn btn-sm btn-outline-secondary" href="/admin/login/?next={{ request.path }}">Log in to vote</a>
+      {% endif %}
+    </div>
+  </div>
 </div>
 
 <hr class="my-4">
 
+<!-- Comments -->
 <div class="card p-3 shadow-sm">
   <h5 class="mb-3">Comments ({{ comments|length }})</h5>
 
