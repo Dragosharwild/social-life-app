@@ -11,32 +11,12 @@
             aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
       <span class="navbar-toggler-icon"></span>
     </button>
-    
-    <div class="collapse navbar-collapse" id="navbarNav">
-      <ul class="navbar-nav me-auto">
-        <li class="nav-item">
-          <a class="nav-link position-relative" href="{% url 'circles:activities_list' %}">
-            <i class="bi bi-calendar-event me-1"></i>Activities
-            <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
-              3
-            </span>
-          </a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link" href="{% url 'circles:events_calendar' %}">
-            <i class="bi bi-calendar-date me-1"></i>Events
-          </a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link" href="{% url 'circles:board' %}">
-            <i class="bi bi-pin-angle me-1"></i>Bulletin Board
-          </a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link text-danger" href="{% url 'circles:contacts' %}">
-            <i class="bi bi-telephone me-1"></i>Emergency
-          </a>
-        </li>
+    <div id="nav" class="collapse navbar-collapse">
+      <ul class="navbar-nav ms-auto">
+        <li class="nav-item"><a class="nav-link" href="{% url 'circles:activities_list' %}">Activities</a></li>
+        <li class="nav-item"><a class="nav-link" href="{% url 'circles:events_calendar' %}">Events</a></li>
+        <li class="nav-item"><a class="nav-link" href="{% url 'circles:board' %}">Bulletin Board</a></li>
+        <li class="nav-item"><a class="nav-link" href="{% url 'circles:contacts' %}">Emergency</a></li>
       </ul>
       
       <!-- Search bar -->
