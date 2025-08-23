@@ -18,6 +18,8 @@ from django.contrib.auth.views import LoginView
 from django.contrib.auth.forms import UserCreationForm
 from django.shortcuts import render, redirect
 
+from django.urls import reverse
+
 from django.db.models import Q
 
 
@@ -177,6 +179,18 @@ class ActivityDeleteView(DeleteView):
     model = Activity
     template_name = "circles/activity_confirm_delete.html"
     success_url = reverse_lazy("circles:activities_list")
+    
+class CircleCreateView(LoginRequiredMixin, CreateView):
+    model = Circle
+    fields = ['name', 'description', 'is_public']
+    template_name = 'circles/circle_form.html'
+    
+    def form_valid(self, form):
+        form.instance.owner = self.request.user
+        return super().form_valid(form)
+    
+    def get_success_url(self):
+        return reverse('circles:circle_detail', kwargs={'slug': self.object.slug})
     
 # User Registration (Sign Up)
 def signup(request):

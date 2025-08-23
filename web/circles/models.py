@@ -3,6 +3,7 @@ from django.db.models import Sum
 from django.contrib.auth import get_user_model
 from django.utils.text import slugify
 from django.urls import reverse
+from django.contrib.auth.models import User
 
 User = get_user_model()
 
@@ -36,6 +37,8 @@ class Circle(TimeStampedModel):
 
     def get_absolute_url(self):
         return reverse("circles:circle_detail", kwargs={"slug": self.slug})
+    
+
 
 class Membership(TimeStampedModel):
     MEMBER = "member"
@@ -127,3 +130,5 @@ class Vote(TimeStampedModel):
 
     def __str__(self):
         return f"{self.user} voted {self.get_value_display()} on {self.post}"
+    
+    

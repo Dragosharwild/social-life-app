@@ -8,8 +8,9 @@ urlpatterns = [
     # Home
     path("", views.home, name="index"),
 
-    # Circles
+    # Circles - NOTE THE ORDER!
     path("c/", views.CircleListView.as_view(), name="circle_list"),
+    path("c/new/", views.CircleCreateView.as_view(), name="circle_create"),  # ADD THIS
     path("c/<slug:slug>/", views.CircleDetailView.as_view(), name="circle_detail"),
 
     # Posts (scoped to circle)
@@ -41,7 +42,7 @@ urlpatterns = [
     # Search
     path("search/", views.search, name="search"),
     
-    # Authentication URLs - ONLY ONE SET!
+    # Authentication URLs
     path('accounts/login/', views.CustomLoginView.as_view(), name='login'),
     path('accounts/logout/', auth_views.LogoutView.as_view(), name='logout'),
     path('signup/', views.signup, name='signup'),
