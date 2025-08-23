@@ -1,7 +1,8 @@
 from django.urls import path
 from . import views
+from django.contrib.auth import views as auth_views
 
-app_name = "circles"  # This line is essential for namespace
+app_name = "circles"
 
 urlpatterns = [
     # Home
@@ -37,10 +38,11 @@ urlpatterns = [
     path("board/", views.bulletin_board, name="board"),
     path("emergency/", views.emergency_contacts, name="contacts"),
     
-    # User Registration (Sign Up)
-    path("signup/", views.signup, name="signup"),
-    
     # Search
     path("search/", views.search, name="search"),
     
+    # Authentication URLs - ONLY ONE SET!
+    path('accounts/login/', views.CustomLoginView.as_view(), name='login'),
+    path('accounts/logout/', auth_views.LogoutView.as_view(), name='logout'),
+    path('signup/', views.signup, name='signup'),
 ]

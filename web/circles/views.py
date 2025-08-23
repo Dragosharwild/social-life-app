@@ -14,6 +14,7 @@ from .models import (
 from .forms import PostForm, ActivityForm, CommentForm
 
 from django.contrib.auth import login, authenticate
+from django.contrib.auth.views import LoginView
 from django.contrib.auth.forms import UserCreationForm
 from django.shortcuts import render, redirect
 
@@ -182,15 +183,31 @@ def signup(request):
     if request.method == 'POST':
         form = UserCreationForm(request.POST)
         if form.is_valid():
-            form.save()
+            user = form.save()
+            
+            # Authenticate and login the user immediately after signup
             username = form.cleaned_data.get('username')
-            raw_password = form.cleaned_data.get('password1')
-            user = authenticate(username=username, password=raw_password)
-            login(request, user)
-            return redirect('circles:index')
+            password = form.cleaned_data.get('password1')
+            user = authenticate(username=username, password=password)
+            
+            if user is not None:
+                login(request, user)
+                return redirect('circles:index')
+            else:
+                # If authentication fails, redirect to login page
+                return redirect('login')
     else:
         form = UserCreationForm()
+    
     return render(request, 'registration/signup.html', {'form': form})
+
+# Login
+class CustomLoginView(LoginView):
+    template_name = 'registration/login.html'
+    
+    def form_valid(self, form):
+        response = super().form_valid(form)
+        return response
 
 # Search Functionality
 def search(request):
