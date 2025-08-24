@@ -21,6 +21,17 @@ from .models import (
     Circle, Post, Activity,
     Comment, Vote, Membership, Event
 )
+from .forms import PostForm, ActivityForm, CommentForm
+
+from django.contrib.auth import login, authenticate
+from django.contrib.auth.views import LoginView
+from django.contrib.auth.forms import UserCreationForm
+from django.shortcuts import render, redirect
+
+from django.urls import reverse
+
+from django.db.models import Q
+
 
 # Home
 def home(request):
@@ -321,6 +332,19 @@ class ActivityDeleteView(DeleteView):
     success_url = reverse_lazy("circles:activities_list")
 
 
+    
+class CircleCreateView(LoginRequiredMixin, CreateView):
+    model = Circle
+    fields = ['name', 'description', 'is_public']
+    template_name = 'circles/circle_form.html'
+    
+    def form_valid(self, form):
+        form.instance.owner = self.request.user
+        return super().form_valid(form)
+    
+    def get_success_url(self):
+        return reverse('circles:circle_detail', kwargs={'slug': self.object.slug})
+    
 # User Registration (Sign Up)
 def signup(request):
     if request.method == "POST":
