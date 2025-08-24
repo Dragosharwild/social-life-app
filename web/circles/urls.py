@@ -42,12 +42,18 @@ urlpatterns = [
     path("events/<int:pk>/delete/", views.EventDeleteView.as_view(), name="event_delete"),
     
     # Placeholder views for navbar
-    path("events/", views.events_calendar, name="events_calendar"),
     path("board/", views.bulletin_board, name="board"),
-    path("emergency/", views.emergency_contacts, name="contacts"),
     
     # Search
     path("search/", views.search, name="search"),
+    
+    # Emergency
+    path("emergency/", views.emergency_contacts, name="emergency_contacts"),
+    path("emergency/new/", views.emergency_contact_create, name="emergency_contact_create"),
+
+    # Legacy aliases (so older templates that use 'contacts' still work)
+    path("contacts/", views.emergency_contacts, name="contacts"),
+    path("contacts/new/", views.emergency_contact_create, name="contacts_new"),
     
     # Authentication URLs
     path('accounts/login/', views.CustomLoginView.as_view(), name='login'),

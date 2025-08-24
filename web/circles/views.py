@@ -5,6 +5,7 @@ from django.contrib.auth import login, authenticate
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.views import LoginView
+from django.contrib.auth.decorators import login_required
 from django.db.models import Q
 from django.http import HttpResponseRedirect
 from django.shortcuts import render, get_object_or_404, redirect
@@ -16,12 +17,15 @@ from django.views.generic import (
     ListView, DetailView, CreateView, UpdateView, DeleteView
 )
 
-from .forms import PostForm, ActivityForm, CommentForm, EventForm
+from .forms import (
+    PostForm, ActivityForm, CommentForm, 
+    EventForm, EmergencyContactForm)
+
 from .models import (
     Circle, Post, Activity,
-    Comment, Vote, Membership, Event
+    Comment, Vote, Membership, 
+    Event, EmergencyContact
 )
-from .forms import PostForm, ActivityForm, CommentForm
 
 from django.contrib.auth import login, authenticate
 from django.contrib.auth.views import LoginView
@@ -131,7 +135,31 @@ def bulletin_board(request):
 
 
 def emergency_contacts(request):
-    return render(request, "circles/placeholder.html", {"title": "Emergency Contacts"})
+    contacts = EmergencyContact.objects.all()
+    grouped = {
+        "security": [c for c in contacts if c.type == EmergencyContact.SECURITY],
+        "counseling": [c for c in contacts if c.type == EmergencyContact.COUNSELING],
+        "health": [c for c in contacts if c.type == EmergencyContact.HEALTH],
+        "other": [c for c in contacts if c.type == EmergencyContact.OTHER],
+    }
+    return render(request, "circles/emergency_contacts.html", {
+        "title": "Emergency",
+        "grouped": grouped,
+    })
+
+
+@login_required
+def emergency_contact_create(request):
+    if request.method == "POST":
+        form = EmergencyContactForm(request.POST)
+        if form.is_valid():
+            form.save()
+            return redirect("circles:emergency_contacts")  # works with namespace
+    else:
+        form = EmergencyContactForm()
+    return render(request, "circles/emergency_contact_form.html", {
+        "form": form, "title": "Add Emergency Contact"
+    })
 
 
 # Circles

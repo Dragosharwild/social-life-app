@@ -1,5 +1,5 @@
 from django import forms
-from .models import Activity, Post, Comment, Event
+from .models import Activity, Post, Comment, Event, EmergencyContact
 
 class CommentForm(forms.ModelForm):
     class Meta:
@@ -26,3 +26,8 @@ class EventForm(forms.ModelForm):
             "starts_at": forms.DateTimeInput(attrs={"type": "datetime-local"}),
             "ends_at": forms.DateTimeInput(attrs={"type": "datetime-local"}),
         }
+
+class EmergencyContactForm(forms.ModelForm):
+    class Meta:
+        model = EmergencyContact
+        fields = ["name", "type", "phone", "alt_phone", "is_24_7", "priority", "notes"]
