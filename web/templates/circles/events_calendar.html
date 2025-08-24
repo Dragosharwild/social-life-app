@@ -1,8 +1,227 @@
-{% extends "base.html" %}
-{% block title %}Events{% endblock %}
+{% extends "circles/base.html" %}
+
+{% block title %}{{ title }}{% endblock %}
+
 {% block content %}
-<h2 class="h4 mb-3">Event Calendar</h2>
-<div class="card p-3 shadow-sm">
-  <p class="mb-0 text-muted">Calendar view coming soon. For now this page renders and is wired to /events/.</p>
+<div class="container mt-4">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h1 class="mb-0">{{ title }}</h1>
+    <a href="{% url 'circles:event_create' %}" class="btn btn-primary" aria-label="Add a new event">
+      <i class="fas fa-plus" aria-hidden="true"></i> Add Event
+    </a>
+  </div>
+
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <a
+      href="{% url 'circles:events_calendar' %}?year={{ prev_year }}&month={{ prev_month }}"
+      class="btn btn-outline-primary"
+      aria-label="Previous month"
+    >
+      &larr; Previous Month
+    </a>
+
+    <!-- Aria-live announces month changes when navigating -->
+    <h3 id="calendar-current-month" aria-live="polite" class="mb-0">
+      {{ month|date:"F" }} {{ year }}
+    </h3>
+
+    <a
+      href="{% url 'circles:events_calendar' %}?year={{ next_year }}&month={{ next_month }}"
+      class="btn btn-outline-primary"
+      aria-label="Next month"
+    >
+      Next Month &rarr;
+    </a>
+  </div>
+
+  <div class="calendar-container mb-4" role="region" aria-label="Month view calendar">
+    {{ calendar|safe }}
+  </div>
+
+  <div class="all-events">
+    <h3>All Events This Month</h3>
+    {% if events %}
+      <div class="list-group">
+        {% for event in events %}
+          <div class="list-group-item">
+            <div class="d-flex w-100 justify-content-between align-items-start gap-2">
+              <h5 class="mb-1">{{ event.title }}</h5>
+              <small class="text-nowrap">
+                {{ event.starts_at|date:"M d, Y" }} at {{ event.starts_at|time }}
+              </small>
+            </div>
+
+            {% if event.description %}
+              <p class="mb-1">{{ event.description }}</p>
+            {% endif %}
+
+            <small>
+              {% if event.circle %}
+                Circle:
+                <a href="{{ event.circle.get_absolute_url }}">{{ event.circle.name }}</a>
+              {% else %}
+                Global Event
+              {% endif %}
+            </small>
+
+            {% if user.is_authenticated %}
+              <div class="mt-2 d-flex gap-2">
+                {% if perms.circles.change_event or event.created_by_id == user.id %}
+                  <a href="{% url 'circles:event_update' event.pk %}"
+                     class="btn btn-sm btn-outline-secondary"
+                     aria-label="Edit {{ event.title|escape }}">
+                    Edit
+                  </a>
+                {% endif %}
+                {% if perms.circles.delete_event or event.created_by_id == user.id %}
+                  <a href="{% url 'circles:event_delete' event.pk %}"
+                     class="btn btn-sm btn-outline-danger"
+                     aria-label="Delete {{ event.title|escape }}">
+                    Delete
+                  </a>
+                {% endif %}
+              </div>
+            {% endif %}
+          </div>
+        {% endfor %}
+      </div>
+    {% else %}
+      <div class="alert alert-info" role="status">
+        No events scheduled for this month.
+      </div>
+    {% endif %}
+  </div>
 </div>
+
+<style>
+/* Utility for screen-reader-only text (if you ever need it) */
+.sr-only {
+  position: absolute !important;
+  width: 1px; height: 1px;
+  padding: 0; margin: -1px;
+  overflow: hidden; clip: rect(0, 0, 1px, 1px);
+  white-space: nowrap; border: 0;
+}
+
+.calendar-container table {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: fixed;
+}
+
+.calendar-container th,
+.calendar-container td {
+  border: 1px solid #dee2e6;
+  padding: 8px;
+  vertical-align: top;
+  height: 120px; /* keep a consistent grid; consider min-height + overflow for long days */
+}
+
+.calendar-container th {
+  background-color: #f8f9fa;
+  text-align: center;
+  font-weight: bold;
+}
+
+.calendar-container .calendar-events {
+  margin-top: 5px;
+}
+
+.calendar-container .calendar-event {
+  font-size: 0.75rem;
+  padding: 2px 4px;
+  margin-bottom: 2px;
+  background-color: #e3f2fd;
+  border-left: 3px solid #2196f3;
+  border-radius: 2px;
+  cursor: pointer;
+}
+
+.calendar-container .calendar-event:hover,
+.calendar-container .calendar-event:focus {
+  background-color: #bbdefb;
+  outline: none;
+}
+
+.calendar-container .calendar-event small {
+  color: #666;
+}
+
+/* Highlight today's date (applied via JS when viewing current month) */
+.calendar-container td.today {
+  background-color: #fff3e0;
+  position: relative;
+}
+
+.calendar-container td.today .day-number {
+  font-weight: bold;
+  color: #ff5722;
+}
+
+/* Style for days not in the current month (depends on server-rendered class) */
+.calendar-container td.noday {
+  background-color: #f8f9fa;
+  color: #6c757d;
+}
+
+/* Visual "Today" badge */
+.calendar-container td.today::before {
+  content: "Today";
+  position: absolute;
+  top: 2px;
+  right: 2px;
+  font-size: 0.6rem;
+  background-color: #ff5722;
+  color: white;
+  padding: 1px 4px;
+  border-radius: 3px;
+}
+</style>
+
+<script>
+/**
+ * Robust "today" highlighting that works whether the server calendar
+ * wraps the number in .day-number or not, and avoids false positives.
+ */
+document.addEventListener('DOMContentLoaded', () => {
+  const today = new Date();
+  const todayDate = today.getDate();
+  const currentMonth = today.getMonth() + 1; // JS months: 0-11, so +1
+  const currentYear = today.getFullYear();
+
+  // Prefer explicit numeric month from Django to avoid type issues
+  const viewMonth = {{ month|date:"n" }}; // 1–12
+  const viewYear  = {{ year }};          // 4-digit year
+
+  if (viewMonth === currentMonth && viewYear === currentYear) {
+    const cells = document.querySelectorAll('.calendar-container td');
+    cells.forEach(td => {
+      // Skip cells explicitly marked as not current month if your server does that
+      const isOtherMonth = td.classList.contains('noday') || td.classList.contains('not-current-month');
+
+      // Try to read a dedicated day-number element if present
+      const numEl = td.querySelector('.day-number');
+
+      // Fallback: look for a leading integer in the cell text (avoid event times)
+      let dayNum = NaN;
+      if (numEl && numEl.textContent) {
+        dayNum = parseInt(numEl.textContent.trim(), 10);
+      } else {
+        // Heuristic: the first number in the cell that's 1-31
+        const match = (td.textContent || '').trim().match(/^(\d{1,2})\b/);
+        if (match) dayNum = parseInt(match[1], 10);
+      }
+
+      if (!isOtherMonth && !Number.isNaN(dayNum) && dayNum === todayDate) {
+        td.classList.add('today');
+      }
+
+      // If your server marks other-month days differently, mirror that here
+      if (td.classList.contains('noday')) {
+        td.classList.add('not-current-month');
+      }
+    });
+  }
+});
+</script>
 {% endblock %}

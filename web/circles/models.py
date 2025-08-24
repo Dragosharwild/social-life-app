@@ -37,7 +37,6 @@ class Circle(TimeStampedModel):
 
     def get_absolute_url(self):
         return reverse("circles:circle_detail", kwargs={"slug": self.slug})
-    
 
 
 class Membership(TimeStampedModel):
@@ -82,7 +81,7 @@ class Post(TimeStampedModel):
     title = models.CharField(max_length=160)
     body = models.TextField(blank=True)
     link_url = models.URLField(blank=True)
-    score = models.IntegerField(default=0)  # optional legacy field; display uses score_total
+    score = models.IntegerField(default=0)
 
     class Meta:
         ordering = ["-created_at"]
@@ -95,12 +94,10 @@ class Post(TimeStampedModel):
 
     @property
     def score_total(self) -> int:
-        """Sum of all votes (+1/-1). Falls back to 0 if no votes."""
         return self.votes.aggregate(total=Sum("value"))["total"] or 0
 
 
 class Comment(TimeStampedModel):
-    # Use string FK to avoid NameError if Post isn't loaded yet
     post = models.ForeignKey("Post", on_delete=models.CASCADE, related_name="comments")
     author = models.ForeignKey(User, on_delete=models.CASCADE, related_name="comments")
     body = models.TextField()
@@ -121,7 +118,6 @@ class Vote(TimeStampedModel):
     )
 
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="votes")
-    # String FK avoids load-order issues with Post
     post = models.ForeignKey("Post", on_delete=models.CASCADE, related_name="votes")
     value = models.SmallIntegerField(choices=VALUES)
 
@@ -130,5 +126,34 @@ class Vote(TimeStampedModel):
 
     def __str__(self):
         return f"{self.user} voted {self.get_value_display()} on {self.post}"
-    
-    
+
+
+class Event(TimeStampedModel):
+    title = models.CharField(max_length=200)
+    description = models.TextField(blank=True)
+    starts_at = models.DateTimeField()
+    ends_at = models.DateTimeField(blank=True, null=True)
+    location = models.CharField(max_length=200, blank=True)
+    circle = models.ForeignKey(
+        Circle,
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+        related_name="events",
+    )
+    created_by = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name="created_events",
+        null=True,
+        blank=True,
+    )
+
+    class Meta:
+        ordering = ["starts_at"]
+
+    def __str__(self):
+        return self.title
+
+    def get_absolute_url(self):
+        return reverse("circles:event_detail", kwargs={"pk": self.pk})

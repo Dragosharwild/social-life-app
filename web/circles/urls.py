@@ -34,6 +34,13 @@ urlpatterns = [
     path("activities/<int:pk>/edit/", views.ActivityUpdateView.as_view(), name="activity_update"),
     path("activities/<int:pk>/delete/", views.ActivityDeleteView.as_view(), name="activity_delete"),
     
+    # Events CRUD
+    path("events/", views.events_calendar, name="events_calendar"),
+    path("events/list/", views.EventListView.as_view(), name="events_list"),
+    path("events/new/", views.EventCreateView.as_view(), name="event_create"),  # This line must exist
+    path("events/<int:pk>/edit/", views.EventUpdateView.as_view(), name="event_update"),
+    path("events/<int:pk>/delete/", views.EventDeleteView.as_view(), name="event_delete"),
+    
     # Placeholder views for navbar
     path("events/", views.events_calendar, name="events_calendar"),
     path("board/", views.bulletin_board, name="board"),

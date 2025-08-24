@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Circle, Post, Activity, Vote, Membership
+from .models import Circle, Post, Activity, Vote, Membership, Event
 
 @admin.register(Circle)
 class CircleAdmin(admin.ModelAdmin):

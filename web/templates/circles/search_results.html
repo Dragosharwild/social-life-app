@@ -83,6 +83,33 @@
                 </div>
             </div>
         {% endif %}
+
+        <!-- Events Results -->
+        {% if results.events %}
+            <h3>Events</h3>
+            <div class="list-group mb-4">
+                {% for event in results.events %}
+                    <div class="list-group-item">
+                        <h5 class="mb-1">{{ event.title }}</h5>
+                        <p class="mb-1">
+                            <strong>When:</strong> {{ event.starts_at|date:"M d, Y" }} at {{ event.starts_at|time }}<br>
+                            {% if event.ends_at %}
+                                <strong>Ends:</strong> {{ event.ends_at|date:"M d, Y" }} at {{ event.ends_at|time }}<br>
+                            {% endif %}
+                            {% if event.location %}
+                                <strong>Location:</strong> {{ event.location }}<br>
+                            {% endif %}
+                            {% if event.circle %}
+                                <strong>Circle:</strong> <a href="{{ event.circle.get_absolute_url }}">{{ event.circle.name }}</a>
+                            {% endif %}
+                        </p>
+                        {% if event.description %}
+                            <p class="mb-1">{{ event.description|truncatewords:20 }}</p>
+                        {% endif %}
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
         
         <!-- No Results -->
         {% if not results.circles and not results.posts and not results.activities %}
