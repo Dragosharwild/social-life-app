@@ -140,7 +140,7 @@ class Event(TimeStampedModel):
         blank=True,
         related_name="events",
     )
-    # Keep created_by to support permissions; nullable for easier migration
+    # Keep created_by for permissions; nullable for easy migration
     created_by = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
