@@ -278,8 +278,8 @@ class EventUpdateView(LoginRequiredMixin, UpdateView):
     template_name = "circles/event_form.html"
     success_url = reverse_lazy("circles:events_list")
 
+    # Only allow owners to edit their events
     def get_queryset(self):
-        # Only allow owners to edit their events
         return Event.objects.filter(created_by=self.request.user)
 
 
@@ -288,8 +288,8 @@ class EventDeleteView(LoginRequiredMixin, DeleteView):
     template_name = "circles/event_confirm_delete.html"
     success_url = reverse_lazy("circles:events_list")
 
+    # Only allow owners to delete their events
     def get_queryset(self):
-        # Only allow owners to delete their events
         return Event.objects.filter(created_by=self.request.user)
 
 
@@ -348,7 +348,7 @@ class CustomLoginView(LoginView):
         return response
 
 
-# Search
+# Search Functionality
 def search(request):
     query = request.GET.get("q", "")
     results = {"circles": [], "posts": [], "activities": [], "events": []}
