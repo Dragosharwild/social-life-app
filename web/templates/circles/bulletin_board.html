@@ -1,0 +1,68 @@
+{% extends "base.html" %}
+{% block title %}Bulletin Board{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2>Bulletin Board</h2>
+    {% if user.is_authenticated %}
+        <a href="{% url 'circles:bulletin_create' %}" class="btn btn-primary">
+            <i class="bi bi-plus-circle"></i> New Post
+        </a>
+    {% endif %}
+</div>
+
+{% if bulletins %}
+    <div class="row">
+        {% for bulletin in bulletins %}
+            <div class="col-md-6 col-lg-4 mb-4">
+                <div class="card h-100 {% if bulletin.is_pinned %}border-warning{% endif %}">
+                    {% if bulletin.is_pinned %}
+                        <div class="card-header bg-warning py-2">
+                            <small><i class="bi bi-pin-angle-fill"></i> Pinned</small>
+                        </div>
+                    {% endif %}
+                    <div class="card-body">
+                        <h5 class="card-title">{{ bulletin.title }}</h5>
+                        <p class="card-text">{{ bulletin.content|linebreaksbr|truncatewords:30 }}</p>
+                        
+                        {% if bulletin.expires_at %}
+                            <div class="mb-2">
+                                <small class="text-muted">
+                                    Expires: {{ bulletin.expires_at|date:"M j, Y, g:i a" }}
+                                </small>
+                            </div>
+                        {% endif %}
+                    </div>
+                    <div class="card-footer bg-transparent">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <small class="text-muted">
+                                By {{ bulletin.author }} • {{ bulletin.created_at|timesince }} ago
+                            </small>
+                            {% if user == bulletin.author or user.is_staff %}
+                                <form method="post" action="{% url 'circles:bulletin_delete' bulletin.pk %}" class="d-inline">
+                                    {% csrf_token %}
+                                    <button type="submit" class="btn btn-sm btn-outline-danger" 
+                                            onclick="return confirm('Delete this bulletin post?')">
+                                        <i class="bi bi-trash"></i>
+                                    </button>
+                                </form>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+{% else %}
+    <div class="text-center py-5">
+        <i class="bi bi-clipboard-x display-1 text-muted"></i>
+        <h4 class="text-muted mt-3">No bulletin posts yet</h4>
+        <p class="text-muted">Be the first to share an announcement!</p>
+        {% if user.is_authenticated %}
+            <a href="{% url 'circles:bulletin_create' %}" class="btn btn-primary mt-2">
+                Create First Post
+            </a>
+        {% endif %}
+    </div>
+{% endif %}
+{% endblock %}

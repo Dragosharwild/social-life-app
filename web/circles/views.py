@@ -19,12 +19,12 @@ from django.views.generic import (
 
 from .forms import (
     PostForm, ActivityForm, CommentForm, 
-    EventForm, EmergencyContactForm)
+    EventForm, EmergencyContactForm, BulletinBoardForm)
 
 from .models import (
     Circle, Post, Activity,
     Comment, Vote, Membership, 
-    Event, EmergencyContact
+    Event, EmergencyContact, BulletinBoard
 )
 
 from django.contrib.auth import login, authenticate
@@ -33,6 +33,8 @@ from django.contrib.auth.forms import UserCreationForm
 from django.shortcuts import render, redirect
 
 from django.urls import reverse
+
+from django.core.exceptions import PermissionDenied
 
 from django.db.models import Q
 
@@ -131,7 +133,47 @@ def events_calendar(request):
 
 # Placeholder views for navbar
 def bulletin_board(request):
-    return render(request, "circles/placeholder.html", {"title": "Bulletin Board"})
+    bulletins = BulletinBoard.objects.filter(
+        Q(expires_at__isnull=True) | Q(expires_at__gt=timezone.now())
+    ).select_related('author')
+    
+    return render(request, "circles/bulletin_board.html", {
+        "title": "Bulletin Board",
+        "bulletins": bulletins,
+    })
+
+@login_required
+def bulletin_create(request):
+    if request.method == "POST":
+        form = BulletinBoardForm(request.POST)
+        if form.is_valid():
+            bulletin = form.save(commit=False)
+            bulletin.author = request.user
+            bulletin.save()
+            return redirect("circles:board")
+    else:
+        form = BulletinBoardForm()
+    
+    return render(request, "circles/bulletin_form.html", {
+        "form": form,
+        "title": "Create Bulletin Post"
+    })
+
+@login_required
+def bulletin_delete(request, pk):
+    bulletin = get_object_or_404(BulletinBoard, pk=pk)
+    
+    # Only allow authors or staff to delete
+    if bulletin.author != request.user and not request.user.is_staff:
+        raise PermissionDenied("You can only delete your own bulletin posts.")
+    
+    if request.method == "POST":
+        bulletin.delete()
+        return redirect("circles:board")
+    
+    return render(request, "circles/bulletin_confirm_delete.html", {
+        "bulletin": bulletin
+    })
 
 
 def emergency_contacts(request):
@@ -180,9 +222,17 @@ class CircleDetailView(DetailView):
         ctx = super().get_context_data(**kwargs)
         user = self.request.user
         ctx["posts"] = self.object.posts.select_related("author")[:25]
-        is_member = user.is_authenticated and self.object.memberships.filter(user=user).exists()
+        
+        # user member?
+        is_member = user.is_authenticated and self.object.members.filter(id=user.id).exists()
         ctx["is_member"] = is_member
+        
+        # is user owner?
+        ctx["is_owner"] = (self.object.owner == user) if user.is_authenticated else False
+        
+        # member count
         ctx["member_count"] = self.object.memberships.count()
+        
         return ctx
 
 
@@ -193,10 +243,50 @@ class CircleCreateView(LoginRequiredMixin, CreateView):
 
     def form_valid(self, form):
         form.instance.owner = self.request.user
-        return super().form_valid(form)
+        response = super().form_valid(form)  # Save the circle first
+        
+        # Create membership with owner role
+        Membership.objects.create(
+            circle=self.object,
+            user=self.request.user,
+            role=Membership.OWNER,
+        )
+        
+        # Add to members ManyToMany
+        self.object.members.add(self.request.user)
+        
+        return response
 
     def get_success_url(self):
         return reverse("circles:circle_detail", kwargs={"slug": self.object.slug})
+    
+    
+class CircleOwnerMixin:
+    def dispatch(self, request, *args, **kwargs):
+        circle = self.get_object()
+        if not circle.owner == request.user:
+            raise PermissionDenied("You do not have permission to modify this circle, only the owner can do that.")
+        return super().dispatch(request, *args, **kwargs)
+    
+class CircleUpdateView(LoginRequiredMixin, CircleOwnerMixin, UpdateView):
+    model = Circle
+    fields = ["name", "description", "is_public"]
+    template_name = "circles/circle_form.html"
+    
+    def get_object(self):
+        return get_object_or_404(Circle, slug=self.kwargs["slug"])
+    
+    def get_success_url(self):
+        return reverse("circles:circle_detail", kwargs={"slug": self.object.slug})
+    
+    
+class CircleDeleteView(LoginRequiredMixin, CircleOwnerMixin, DeleteView):
+    model = Circle
+    template_name = "circles/circle_confirm_delete.html"
+    success_url = reverse_lazy("circles:circle_list")
+
+    def get_object(self):
+        return get_object_or_404(Circle, slug=self.kwargs["slug"])
 
 
 # Posts
@@ -271,18 +361,19 @@ class PostVoteView(LoginRequiredMixin, View):
 
 
 # Membership (join/leave circles)
-class JoinCircleView(LoginRequiredMixin, View):
-    def post(self, request, slug):
+def join_circle(request, slug):
+    if request.method == "POST":
         circle = get_object_or_404(Circle, slug=slug)
         Membership.objects.get_or_create(user=request.user, circle=circle)
         return HttpResponseRedirect(circle.get_absolute_url())
+    return HttpResponseRedirect(reverse("circles:circle_detail", kwargs={"slug": slug}))
 
-
-class LeaveCircleView(LoginRequiredMixin, View):
-    def post(self, request, slug):
+def leave_circle(request, slug):
+    if request.method == "POST":
         circle = get_object_or_404(Circle, slug=slug)
         Membership.objects.filter(user=request.user, circle=circle).delete()
         return HttpResponseRedirect(circle.get_absolute_url())
+    return HttpResponseRedirect(reverse("circles:circle_detail", kwargs={"slug": slug}))
 
 
 # Events CRUD
@@ -359,19 +450,6 @@ class ActivityDeleteView(DeleteView):
     template_name = "circles/activity_confirm_delete.html"
     success_url = reverse_lazy("circles:activities_list")
 
-
-    
-class CircleCreateView(LoginRequiredMixin, CreateView):
-    model = Circle
-    fields = ['name', 'description', 'is_public']
-    template_name = 'circles/circle_form.html'
-    
-    def form_valid(self, form):
-        form.instance.owner = self.request.user
-        return super().form_valid(form)
-    
-    def get_success_url(self):
-        return reverse('circles:circle_detail', kwargs={'slug': self.object.slug})
     
 # User Registration (Sign Up)
 def signup(request):
@@ -392,12 +470,16 @@ def signup(request):
 
 
 # Login
+# circles/views.py
 class CustomLoginView(LoginView):
     template_name = "registration/login.html"
-
-    def form_valid(self, form):
-        response = super().form_valid(form)
-        return response
+    
+    def get_success_url(self):
+        # Get the 'next' parameter from the request, or use default
+        next_url = self.request.GET.get('next')
+        if next_url:
+            return next_url
+        return super().get_success_url()
 
 
 # Search

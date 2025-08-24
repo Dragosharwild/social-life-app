@@ -100,9 +100,9 @@ DATABASES = {
 # ]
 
 # Authentication settings
-LOGIN_REDIRECT_URL = '/'  # Where to redirect after login
-LOGOUT_REDIRECT_URL = '/'  # Where to redirect after logout
-LOGIN_URL = '/accounts/login/'  # Login page URL
+LOGIN_URL = 'circles:login'  # Use URL name instead of path
+LOGIN_REDIRECT_URL = '/'     # Where to redirect after login
+LOGOUT_REDIRECT_URL = '/'    # Where to redirect after logout
 
 # Session settings (important for authentication)
 SESSION_COOKIE_AGE = 1209600  # 2 weeks in seconds

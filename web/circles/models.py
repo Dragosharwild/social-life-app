@@ -37,6 +37,9 @@ class Circle(TimeStampedModel):
 
     def get_absolute_url(self):
         return reverse("circles:circle_detail", kwargs={"slug": self.slug})
+    
+    def is_owner(self, user):
+        return self.owner == user
 
 
 class EmergencyContact(TimeStampedModel):
@@ -102,6 +105,28 @@ class Activity(TimeStampedModel):
 
     def __str__(self):
         return f"{self.title} ({self.get_day_of_week_display()})"
+    
+    
+class BulletinBoard(TimeStampedModel):
+    title = models.CharField(max_length=200)
+    content = models.TextField()
+    author = models.ForeignKey(User, on_delete=models.CASCADE, related_name="bulletin_posts")
+    is_pinned = models.BooleanField(default=False)
+    expires_at = models.DateTimeField(blank=True, null=True)
+    
+    class Meta:
+        ordering = ["-is_pinned", "-created_at"]
+    
+    def __str__(self):
+        return self.title
+    
+    def is_expired(self):
+        if self.expires_at:
+            return timezone.now() > self.expires_at
+        return False
+    
+    def get_absolute_url(self):
+        return reverse("circles:board")
 
 
 class Post(TimeStampedModel):

@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% block title %}Delete Bulletin Post{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h4 class="mb-0">Delete Bulletin Post</h4>
+            </div>
+            <div class="card-body">
+                <p>Are you sure you want to delete the bulletin post <strong>"{{ bulletin.title }}"</strong>?</p>
+                <p class="text-muted">This action cannot be undone.</p>
+                
+                <form method="post">
+                    {% csrf_token %}
+                    <div class="d-flex gap-2">
+                        <a href="{% url 'circles:board' %}" class="btn btn-secondary">Cancel</a>
+                        <button type="submit" class="btn btn-danger">Delete Post</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -8,6 +8,7 @@
     <div class="text-muted small">
       {% if circle.is_public %}Public{% else %}Private{% endif %}
       • {{ member_count }} member{{ member_count|pluralize }}
+      {% if is_owner %}<span class="badge bg-primary ms-2">Owner</span>{% endif %}
     </div>
     {% if circle.description %}
       <p class="mt-2">{{ circle.description }}</p>
@@ -16,20 +17,33 @@
 
   <div class="d-flex gap-2">
     {% if request.user.is_authenticated %}
-      {% if is_member %}
+      {% if is_owner %}
+        <!-- Owner controls -->
+        <a class="btn btn-outline-secondary" href="{% url 'circles:circle_edit' slug=circle.slug %}">
+          Edit Circle
+        </a>
+        <a class="btn btn-outline-danger" href="{% url 'circles:circle_delete' slug=circle.slug %}">
+          Delete Circle
+        </a>
+        <a class="btn btn-primary" href="{% url 'circles:post_create' slug=circle.slug %}">
+          Create Post
+        </a>
+      {% elif is_member %}
+        <!-- Member controls -->
         <form method="post" action="{% url 'circles:circle_leave' slug=circle.slug %}">
           {% csrf_token %}
           <button class="btn btn-outline-secondary">Leave</button>
         </form>
         <a class="btn btn-primary" href="{% url 'circles:post_create' slug=circle.slug %}">Create Post</a>
       {% else %}
+        <!-- Non-member controls -->
         <form method="post" action="{% url 'circles:circle_join' slug=circle.slug %}">
           {% csrf_token %}
           <button class="btn btn-outline-primary">Join</button>
         </form>
       {% endif %}
     {% else %}
-      <a class="btn btn-outline-primary" href="/admin/login/?next={{ request.path }}">Log in</a>
+      <a class="btn btn-outline-primary" href="{% url 'circles:login' %}?next={{ request.path }}">Log in</a>
     {% endif %}
   </div>
 </div>

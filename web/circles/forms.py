@@ -1,5 +1,6 @@
 from django import forms
-from .models import Activity, Post, Comment, Event, EmergencyContact
+from .models import Activity, Post, Comment, Event, EmergencyContact, BulletinBoard
+from django.utils import timezone
 
 class CommentForm(forms.ModelForm):
     class Meta:
@@ -31,3 +32,17 @@ class EmergencyContactForm(forms.ModelForm):
     class Meta:
         model = EmergencyContact
         fields = ["name", "type", "phone", "alt_phone", "is_24_7", "priority", "notes"]
+        
+
+class BulletinBoardForm(forms.ModelForm):
+    class Meta:
+        model = BulletinBoard
+        fields = ['title', 'content', 'is_pinned', 'expires_at']
+        widgets = {
+            'expires_at': forms.DateTimeInput(attrs={'type': 'datetime-local'}),
+            'content': forms.Textarea(attrs={'rows': 4}),
+        }
+    
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['expires_at'].required = False

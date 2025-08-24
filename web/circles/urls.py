@@ -10,8 +10,10 @@ urlpatterns = [
 
     # Circles - NOTE THE ORDER!
     path("c/", views.CircleListView.as_view(), name="circle_list"),
-    path("c/new/", views.CircleCreateView.as_view(), name="circle_create"),  # ADD THIS
+    path("c/new/", views.CircleCreateView.as_view(), name="circle_create"),
     path("c/<slug:slug>/", views.CircleDetailView.as_view(), name="circle_detail"),
+    path("c/<slug:slug>/edit/", views.CircleUpdateView.as_view(), name="circle_edit"),
+    path("c/<slug:slug>/delete/", views.CircleDeleteView.as_view(), name="circle_delete"),
 
     # Posts (scoped to circle)
     path("c/<slug:slug>/posts/new/", views.PostCreateView.as_view(), name="post_create"),
@@ -25,8 +27,8 @@ urlpatterns = [
     path("c/<slug:slug>/p/<int:pk>/downvote/", views.PostVoteView.as_view(), {"value": -1}, name="post_downvote"),
 
     # Membership
-    path("c/<slug:slug>/join/", views.JoinCircleView.as_view(), name="circle_join"),
-    path("c/<slug:slug>/leave/", views.LeaveCircleView.as_view(), name="circle_leave"),
+    path("c/<slug:slug>/join/", views.join_circle, name="circle_join"),
+    path("c/<slug:slug>/leave/", views.leave_circle, name="circle_leave"),
 
     # Activities CRUD
     path("activities/", views.ActivityListView.as_view(), name="activities_list"),
@@ -41,8 +43,10 @@ urlpatterns = [
     path("events/<int:pk>/edit/", views.EventUpdateView.as_view(), name="event_update"),
     path("events/<int:pk>/delete/", views.EventDeleteView.as_view(), name="event_delete"),
     
-    # Placeholder views for navbar
+    # Bulletin Board URLs
     path("board/", views.bulletin_board, name="board"),
+    path("board/new/", views.bulletin_create, name="bulletin_create"),
+    path("board/<int:pk>/delete/", views.bulletin_delete, name="bulletin_delete"),
     
     # Search
     path("search/", views.search, name="search"),
