@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Circle, Post, Activity, Vote, Membership, Event
+from .models import Circle, Post, Activity, Vote, Membership, Event, EmergencyContact
 
 @admin.register(Circle)
 class CircleAdmin(admin.ModelAdmin):
@@ -39,3 +39,10 @@ class MembershipAdmin(admin.ModelAdmin):
     list_display = ("circle", "user", "role", "created_at")
     list_filter = ("role",)
     search_fields = ("circle__name", "user__username")
+    
+@admin.register(EmergencyContact)
+class EmergencyContactAdmin(admin.ModelAdmin):
+    list_display = ("name", "type", "phone", "is_24_7", "priority", "updated_at")
+    list_filter = ("type", "is_24_7")
+    search_fields = ("name", "phone", "notes")
+    ordering = ("priority", "name")

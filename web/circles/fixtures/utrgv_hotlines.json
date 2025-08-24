@@ -1,0 +1,14 @@
+[
+  {"model":"circles.emergencycontact","pk":101,
+   "fields":{"name":"UTRGV Police – Campus Emergency","type":"security","phone":"956-882-4911","is_24_7":true,"priority":1,"notes":"If off-campus, call 911 first."}},
+  {"model":"circles.emergencycontact","pk":102,
+   "fields":{"name":"UTRGV Police – Edinburg Dispatch","type":"security","phone":"956-665-7151","is_24_7":true,"priority":2}},
+  {"model":"circles.emergencycontact","pk":103,
+   "fields":{"name":"UTRGV Police – Brownsville Dispatch","type":"security","phone":"956-882-2222","is_24_7":true,"priority":3}},
+  {"model":"circles.emergencycontact","pk":104,
+   "fields":{"name":"Vaqueros Crisis Line (24/7)","type":"counseling","phone":"956-665-5555","is_24_7":true,"priority":5}},
+  {"model":"circles.emergencycontact","pk":105,
+   "fields":{"name":"UT Health RGV Student Health – Edinburg","type":"health","phone":"956-665-2511","is_24_7":false,"priority":10}},
+  {"model":"circles.emergencycontact","pk":106,
+   "fields":{"name":"UT Health RGV Student Health – Brownsville","type":"health","phone":"956-882-3896","is_24_7":false,"priority":11}}
+]

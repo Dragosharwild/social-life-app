@@ -1,0 +1,64 @@
+{% extends "circles/base.html" %}
+{% block title %}{{ title }}{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+
+  <div class="text-center mb-4">
+    <h1 class="mb-3">Emergency</h1>
+    <p class="text-muted">Quick access to emergency services. Calls will open your phone app.</p>
+    <!-- Big red 911 button (change for your region if needed) -->
+    <a href="tel:911" class="btn btn-danger btn-lg px-5 py-3" onclick="return confirmDial('911');">
+      Call 911
+    </a>
+  </div>
+
+  <div class="d-flex justify-content-end mb-3">
+    {% if user.is_authenticated %}
+      <a href="{% url 'circles:emergency_contact_create' %}" class="btn btn-outline-primary">Add Contact</a>
+    {% endif %}
+  </div>
+
+  {% for key, items in grouped.items %}
+    {% if items %}
+      <h3 class="mt-4">
+        {% if key == "security" %}Campus Security{% elif key == "counseling" %}Counseling{% elif key == "health" %}Health Services{% else %}Other{% endif %}
+      </h3>
+      <div class="row row-cols-1 row-cols-md-2 g-3">
+        {% for c in items %}
+          <div class="col">
+            <div class="card h-100 shadow-sm">
+              <div class="card-body">
+                <div class="d-flex justify-content-between align-items-start">
+                  <h5 class="card-title mb-1">{{ c.name }}</h5>
+                  {% if c.is_24_7 %}
+                    <span class="badge bg-success">24/7</span>
+                  {% endif %}
+                </div>
+                {% if c.notes %}<p class="card-text small text-muted">{{ c.notes }}</p>{% endif %}
+
+                <div class="d-flex gap-2 flex-wrap">
+                  <a class="btn btn-primary btn-sm" href="tel:{{ c.phone }}" onclick="return confirmDial('{{ c.phone|escapejs }}');">Call</a>
+                  {% if c.alt_phone %}
+                    <a class="btn btn-outline-primary btn-sm" href="tel:{{ c.alt_phone }}" onclick="return confirmDial('{{ c.alt_phone|escapejs }}');">Alt</a>
+                  {% endif %}
+                  <a class="btn btn-outline-secondary btn-sm" href="sms:{{ c.phone }}">Text</a>
+                </div>
+              </div>
+              <div class="card-footer small text-muted">
+                {{ c.get_type_display }} • Priority {{ c.priority }}
+              </div>
+            </div>
+          </div>
+        {% endfor %}
+      </div>
+    {% endif %}
+  {% endfor %}
+</div>
+
+<script>
+function confirmDial(num){
+  return confirm("Call " + num + "?");
+}
+</script>
+{% endblock %}

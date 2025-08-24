@@ -39,6 +39,35 @@ class Circle(TimeStampedModel):
         return reverse("circles:circle_detail", kwargs={"slug": self.slug})
 
 
+class EmergencyContact(TimeStampedModel):
+    SECURITY = "security"
+    COUNSELING = "counseling"
+    HEALTH = "health"
+    OTHER = "other"
+    TYPE_CHOICES = [
+        (SECURITY, "Security"),
+        (COUNSELING, "Counseling"),
+        (HEALTH, "Health Services"),
+        (OTHER, "Other"),
+    ]
+
+    name = models.CharField(max_length=120)
+    type = models.CharField(max_length=20, choices=TYPE_CHOICES, default=OTHER)
+    phone = models.CharField(max_length=32)          # e.g., +1-555-123-4567
+    alt_phone = models.CharField(max_length=32, blank=True)
+    is_24_7 = models.BooleanField(default=False)
+    priority = models.PositiveSmallIntegerField(default=100)  # lower = higher on page
+    notes = models.CharField(max_length=200, blank=True)
+
+    class Meta:
+        ordering = ["priority", "name"]
+
+    def __str__(self):
+        return f"{self.name} ({self.get_type_display()})"
+
+    def get_absolute_url(self):
+        return reverse("circles:emergency_contacts")
+
 class Membership(TimeStampedModel):
     MEMBER = "member"
     MOD = "mod"
