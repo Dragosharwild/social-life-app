@@ -1,5 +1,5 @@
 from django import forms
-from .models import Activity, Post, Comment
+from .models import Activity, Post, Comment, Event
 
 class CommentForm(forms.ModelForm):
     class Meta:
@@ -17,3 +17,12 @@ class PostForm(forms.ModelForm):
     class Meta:
         model = Post
         fields = ["title", "body", "link_url"]
+
+class EventForm(forms.ModelForm):
+    class Meta:
+        model = Event
+        fields = ["title", "description", "starts_at", "ends_at", "location", "circle"]
+        widgets = {
+            "starts_at": forms.DateTimeInput(attrs={"type": "datetime-local"}),
+            "ends_at": forms.DateTimeInput(attrs={"type": "datetime-local"}),
+        }

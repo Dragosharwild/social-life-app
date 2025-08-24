@@ -9,16 +9,19 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 
 from .models import (
     Circle, Post, Activity,
-    Comment, Vote, Membership
+    Comment, Vote, Membership, Event
 )
-from .forms import PostForm, ActivityForm, CommentForm
+from .forms import PostForm, ActivityForm, CommentForm, EventForm
 
 from django.contrib.auth import login, authenticate
 from django.contrib.auth.views import LoginView
 from django.contrib.auth.forms import UserCreationForm
 from django.shortcuts import render, redirect
-
+from datetime import datetime, timedelta
+from calendar import HTMLCalendar
+from django.utils.safestring import mark_safe
 from django.db.models import Q
+from django.utils import timezone
 
 
 # Home
@@ -26,12 +29,105 @@ def home(request):
     return render(request, "circles/index.html")
 
 
-# Placeholder views for navbar
+# Events Calendar
 def events_calendar(request):
-    return render(request, "circles/placeholder.html", {"title": "Events Calendar"})
+    try:
+        # Get current date or use provided year/month from request
+        now = timezone.now()
+        year = request.GET.get('year', now.year)
+        month = request.GET.get('month', now.month)
+        
+        try:
+            year = int(year)
+            month = int(month)
+        except (ValueError, TypeError):
+            year = now.year
+            month = now.month
+        
+        # Calculate previous and next months for navigation
+        prev_month = month - 1
+        prev_year = year
+        if prev_month == 0:
+            prev_month = 12
+            prev_year = year - 1
+            
+        next_month = month + 1
+        next_year = year
+        if next_month == 13:
+            next_month = 1
+            next_year = year + 1
+        
+        # Create calendar
+        cal = HTMLCalendar().formatmonth(year, month)
+        
+        # Get all events for the month
+        first_day = datetime(year, month, 1)
+        if month == 12:
+            last_day = datetime(year+1, 1, 1) - timedelta(days=1)
+        else:
+            last_day = datetime(year, month+1, 1) - timedelta(days=1)
+        
+        # Make datetime objects timezone-aware
+        first_day = timezone.make_aware(first_day)
+        last_day = timezone.make_aware(last_day)
+        
+        events = Event.objects.filter(
+            starts_at__gte=first_day,
+            starts_at__lte=last_day
+        ).select_related('circle')
+        
+        # Create a dictionary of events by day
+        events_by_day = {}
+        for event in events:
+            day = event.starts_at.day
+            if day not in events_by_day:
+                events_by_day[day] = []
+            events_by_day[day].append(event)
+        
+        # Convert calendar to string and add events
+        cal_with_events = str(cal)
+        
+        # Add events to each day in the calendar
+        for day, day_events in events_by_day.items():
+            # Format the day cell to include events
+            day_cell = f'>{day}</td>'
+            
+            event_html = '<div class="calendar-events">'
+            for event in day_events:
+                event_html += f'<div class="calendar-event" data-event-id="{event.id}">'
+                event_html += f'<strong>{event.title}</strong><br>'
+                event_html += f'<small>{event.starts_at.time()}</small>'
+                event_html += '</div>'
+            event_html += '</div>'
+            
+            replacement = f'>{day}{event_html}</td>'
+            cal_with_events = cal_with_events.replace(day_cell, replacement)
+        
+        return render(request, "circles/events_calendar.html", {
+            "title": "Events Calendar",
+            "calendar": mark_safe(cal_with_events),
+            "year": year,
+            "month": month,
+            "prev_year": prev_year,
+            "prev_month": prev_month,
+            "next_year": next_year,
+            "next_month": next_month,
+            "events": events
+        })
+    
+    except Exception as e:
+        # Log the error for debugging
+        print(f"Error in events_calendar: {e}")
+        # Return a simple error response
+        return render(request, "circles/error.html", {
+            "message": "An error occurred while loading the calendar."
+        })
 
+
+# Placeholder views for navbar
 def bulletin_board(request):
     return render(request, "circles/placeholder.html", {"title": "Bulletin Board"})
+
 
 def emergency_contacts(request):
     return render(request, "circles/placeholder.html", {"title": "Emergency Contacts"})
@@ -151,6 +247,45 @@ class LeaveCircleView(LoginRequiredMixin, View):
         return HttpResponseRedirect(circle.get_absolute_url())
 
 
+# Events CRUD
+class EventListView(ListView):
+    model = Event
+    template_name = "circles/events_list.html"
+    context_object_name = "events"
+    ordering = ["starts_at"]
+
+    def get_queryset(self):
+        qs = super().get_queryset().select_related("circle")
+        circle_slug = self.request.GET.get("circle")
+        if circle_slug:
+            qs = qs.filter(circle__slug=circle_slug)
+        return qs
+    
+    def form_valid(self, form):
+        form.instance.created_by = self.request.user
+        return super().form_valid(form)
+
+
+class EventCreateView(LoginRequiredMixin, CreateView):
+    model = Event
+    form_class = EventForm
+    template_name = "circles/event_form.html"
+    success_url = reverse_lazy("circles:events_list")
+
+
+class EventUpdateView(LoginRequiredMixin, UpdateView):
+    model = Event
+    form_class = EventForm
+    template_name = "circles/event_form.html"
+    success_url = reverse_lazy("circles:events_list")
+
+
+class EventDeleteView(LoginRequiredMixin, DeleteView):
+    model = Event
+    template_name = "circles/event_confirm_delete.html"
+    success_url = reverse_lazy("circles:events_list")
+
+
 # Activities CRUD
 class ActivityListView(ListView):
     model = Activity
@@ -178,6 +313,7 @@ class ActivityDeleteView(DeleteView):
     template_name = "circles/activity_confirm_delete.html"
     success_url = reverse_lazy("circles:activities_list")
     
+
 # User Registration (Sign Up)
 def signup(request):
     if request.method == 'POST':
@@ -201,6 +337,7 @@ def signup(request):
     
     return render(request, 'registration/signup.html', {'form': form})
 
+
 # Login
 class CustomLoginView(LoginView):
     template_name = 'registration/login.html'
@@ -209,6 +346,7 @@ class CustomLoginView(LoginView):
         response = super().form_valid(form)
         return response
 
+
 # Search Functionality
 def search(request):
     query = request.GET.get('q', '')
@@ -216,6 +354,7 @@ def search(request):
         'circles': [],
         'posts': [],
         'activities': [],
+        'events': [],  # Add events to search results
     }
     
     if query:
@@ -236,6 +375,13 @@ def search(request):
             Q(title__icontains=query) |
             Q(location__icontains=query)
         )[:5]
+        
+        # Search Events
+        results['events'] = Event.objects.filter(
+            Q(title__icontains=query) |
+            Q(description__icontains=query) |
+            Q(location__icontains=query)
+        ).select_related('circle')[:5]
         
     return render(request, 'circles/search_results.html', {
         'query': query,

@@ -127,3 +127,32 @@ class Vote(TimeStampedModel):
 
     def __str__(self):
         return f"{self.user} voted {self.get_value_display()} on {self.post}"
+    
+class Event(TimeStampedModel):
+    title = models.CharField(max_length=200)
+    description = models.TextField(blank=True)
+    starts_at = models.DateTimeField()
+    ends_at = models.DateTimeField(blank=True, null=True)
+    location = models.CharField(max_length=200, blank=True)
+    circle = models.ForeignKey(
+        Circle, 
+        on_delete=models.CASCADE, 
+        null=True, 
+        blank=True, 
+        related_name='events'
+    )
+    # Remove created_by temporarily
+    # created_by = models.ForeignKey(
+    #     User, 
+    #     on_delete=models.CASCADE, 
+    #     related_name='created_events'
+    # )
+
+    class Meta:
+        ordering = ["starts_at"]
+
+    def __str__(self):
+        return self.title
+
+    def get_absolute_url(self):
+        return reverse("circles:event_detail", kwargs={"pk": self.pk})
